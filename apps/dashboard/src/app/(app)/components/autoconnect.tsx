@@ -1,17 +1,7 @@
 "use client";
-import { getClientThirdwebClient } from "@/constants/thirdweb-client.client";
+import type { ThirdwebClient } from "thirdweb";
 import { AutoConnect } from "thirdweb/react";
-import type { SmartWalletOptions } from "thirdweb/wallets";
 
-const client = getClientThirdwebClient();
-
-export function TWAutoConnect(props: {
-  accountAbstraction?: SmartWalletOptions;
-}) {
-  return (
-    <AutoConnect
-      client={client}
-      accountAbstraction={props.accountAbstraction}
-    />
-  );
+export function TWAutoConnect(props: { client: ThirdwebClient }) {
+  return <AutoConnect client={props.client} />;
 }

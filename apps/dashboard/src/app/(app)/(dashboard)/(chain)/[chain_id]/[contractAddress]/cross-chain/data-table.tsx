@@ -1,5 +1,37 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import {
+  defineChain,
+  eth_getCode,
+  getContract,
+  getRpcClient,
+  prepareContractCall,
+  prepareTransaction,
+  type ThirdwebClient,
+} from "thirdweb";
+import type {
+  FetchDeployMetadataResult,
+  ThirdwebContract,
+} from "thirdweb/contract";
+import {
+  deployContractfromDeployMetadata,
+  getOrDeployInfraForPublishedContract,
+} from "thirdweb/deploys";
+import { useActiveAccount, useSwitchActiveWalletChain } from "thirdweb/react";
+import { concatHex, padHex } from "thirdweb/utils";
+import { z } from "zod";
+import { verifyContract } from "@/api/contract/verify-contract";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -19,46 +51,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ToolTipLabel } from "@/components/ui/tooltip";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { verifyContract } from "app/(app)/(dashboard)/(chain)/[chain_id]/[contractAddress]/sources/ContractSourcesPage";
+import { useSendAndConfirmTx } from "@/hooks/useSendTx";
+import { useTxNotifications } from "@/hooks/useTxNotifications";
+import type { ProjectMeta } from "../../../../../team/[team_slug]/[project_slug]/contract/[chainIdOrSlug]/[contractAddress]/types";
 import {
   type DeployModalStep,
   DeployStatusModal,
   useDeployStatusModal,
-} from "components/contract-components/contract-deploy-form/deploy-context-modal";
-import { useTxNotifications } from "hooks/useTxNotifications";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  type ThirdwebClient,
-  defineChain,
-  eth_getCode,
-  getContract,
-  getRpcClient,
-  prepareContractCall,
-  prepareTransaction,
-  sendAndConfirmTransaction,
-} from "thirdweb";
-import type {
-  FetchDeployMetadataResult,
-  ThirdwebContract,
-} from "thirdweb/contract";
-import {
-  deployContractfromDeployMetadata,
-  getOrDeployInfraForPublishedContract,
-} from "thirdweb/deploys";
-import { useActiveAccount, useSwitchActiveWalletChain } from "thirdweb/react";
-import { concatHex, padHex } from "thirdweb/utils";
-import { z } from "zod";
-import type { ProjectMeta } from "../../../../../team/[team_slug]/[project_slug]/contract/[chainIdOrSlug]/[contractAddress]/types";
+} from "../../../../published-contract/[publisher]/[contract_id]/components/contract-deploy-form/deploy-context-modal";
 import { buildContractPagePath } from "../_utils/contract-page-path";
 import { SingleNetworkSelector } from "./single-network-selector";
 
@@ -127,16 +127,16 @@ export function DataTable({
       const c = defineChain(chain.chainId);
       const code = await eth_getCode(
         getRpcClient({
-          client: client,
           chain: c,
+          client: client,
         }),
         { address: coreContract.address },
       );
 
       const newRow: CrossChain = {
+        chainId: chain.chainId,
         id: chain.chainId,
         network: chain.name,
-        chainId: chain.chainId,
         status: code?.length > 2 ? "DEPLOYED" : "NOT_DEPLOYED",
       };
 
@@ -178,14 +178,16 @@ export function DataTable({
     return Array.from(chainMap.values());
   }, [data, customChainData]);
 
+  const sendAndConfirmTx = useSendAndConfirmTx();
+
   const form = useForm<FormSchema>({
-    resolver: zodResolver(formSchema),
     defaultValues: {
       amounts: {
         "420120000": "",
         "420120001": "",
       },
     },
+    resolver: zodResolver(formSchema),
   });
 
   const crossChainTransfer = async (chainId: ChainId) => {
@@ -216,10 +218,7 @@ export function DataTable({
       ],
     });
 
-    await sendAndConfirmTransaction({
-      account: activeAccount,
-      transaction: sendErc20Tx,
-    });
+    await sendAndConfirmTx.mutateAsync(sendErc20Tx);
   };
 
   const crossChainTransferNotifications = useTxNotifications(
@@ -229,27 +228,27 @@ export function DataTable({
 
   const crossChainTransferMutation = useMutation({
     mutationFn: crossChainTransfer,
-    onSuccess: crossChainTransferNotifications.onSuccess,
     onError: crossChainTransferNotifications.onError,
+    onSuccess: crossChainTransferNotifications.onSuccess,
   });
 
   const columns: ColumnDef<CrossChain>[] = [
     {
       accessorKey: "network",
-      header: "Network",
       cell: ({ row }) => {
         if (row.getValue("status") === "DEPLOYED") {
           const href = buildContractPagePath({
-            projectMeta,
             chainIdOrSlug: `${row.getValue("chainId")}`,
             contractAddress: coreContract.address,
+            projectMeta,
           });
 
           return (
             <Link
-              target="_blank"
               className="text-blue-500 underline"
               href={href}
+              rel="noopener noreferrer"
+              target="_blank"
             >
               {row.getValue("network")}
             </Link>
@@ -257,6 +256,7 @@ export function DataTable({
         }
         return row.getValue("network");
       },
+      header: "Network",
     },
     {
       accessorKey: "chainId",
@@ -264,24 +264,23 @@ export function DataTable({
     },
     {
       accessorKey: "status",
-      header: "Status",
       cell: ({ row }) => {
         if (row.getValue("status") === "DEPLOYED") {
           return <p>Deployed</p>;
         }
         return (
           <Button
-            type="button"
             onClick={() => deployContract(row.getValue("chainId"), client)}
+            type="button"
           >
             Deploy
           </Button>
         );
       },
+      header: "Status",
     },
     {
       accessorKey: "transfer",
-      header: "",
       cell: ({ row }) => {
         const chain = row.getValue("chainId");
         if (
@@ -291,8 +290,8 @@ export function DataTable({
         ) {
           return (
             <FormField
-              disabled={false}
               control={form.control}
+              disabled={false}
               name={`amounts.${row.getValue("chainId") as ChainId}`}
               render={({ field }) => (
                 <FormItem>
@@ -305,14 +304,14 @@ export function DataTable({
                           {...field}
                         />
                         <Button
-                          type="button"
+                          className="rounded-lg rounded-l-none border border-l-0"
                           disabled={false}
                           onClick={() =>
                             crossChainTransferMutation.mutate(
                               row.getValue("chainId"),
                             )
                           }
-                          className="rounded-lg rounded-l-none border border-l-0"
+                          type="button"
                         >
                           Bridge
                         </Button>
@@ -326,12 +325,13 @@ export function DataTable({
           );
         }
       },
+      header: "",
     },
   ];
 
   const table = useReactTable({
-    data: mergedChainData,
     columns,
+    data: mergedChainData,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -350,8 +350,8 @@ export function DataTable({
 
       const steps: DeployModalStep[] = [
         {
-          type: "deploy",
           signatureCount: 1,
+          type: "deploy",
         },
       ];
 
@@ -361,21 +361,18 @@ export function DataTable({
       let crosschainContractAddress: string | undefined;
       if (initCode && isDirectDeploy) {
         const tx = prepareTransaction({
-          client,
           chain,
-          to: "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+          client,
           data: initCode,
+          to: "0x4e59b44847b379578588920cA78FbF26c0B4956C",
         });
 
-        await sendAndConfirmTransaction({
-          transaction: tx,
-          account: activeAccount,
-        });
+        await sendAndConfirmTx.mutateAsync(tx);
 
         const code = await eth_getCode(
           getRpcClient({
-            client,
             chain,
+            client,
           }),
           {
             address: coreContract.address,
@@ -389,9 +386,9 @@ export function DataTable({
         if (modulesMetadata) {
           for (const m of modulesMetadata) {
             await getOrDeployInfraForPublishedContract({
+              account: activeAccount,
               chain,
               client,
-              account: activeAccount,
               contractId: m.name,
               publisher: m.publisher,
             });
@@ -403,8 +400,8 @@ export function DataTable({
           chain,
           client,
           deployMetadata: coreMetadata,
-          isCrosschain: true,
           initializeData,
+          isCrosschain: true,
           salt,
         });
 
@@ -418,9 +415,9 @@ export function DataTable({
 
       if (crosschainContractAddress) {
         const contractLink = buildContractPagePath({
-          projectMeta,
           chainIdOrSlug: `${chain.id}`,
           contractAddress: crosschainContractAddress,
+          projectMeta,
         });
 
         deployStatusModal.setViewContractLink(contractLink);
@@ -472,8 +469,8 @@ export function DataTable({
               <TableBody>
                 {table.getRowModel().rows.map((row) => (
                   <TableRow
-                    key={row.id}
                     data-state={row.getIsSelected() && "selected"}
+                    key={row.id}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -505,10 +502,10 @@ export function DataTable({
 
         <div className="mt-4">
           <SingleNetworkSelector
-            client={client}
-            onAddRow={addRowMutation.mutate}
-            isAddingRow={addRowMutation.isPending}
             className="w-full"
+            client={client}
+            isAddingRow={addRowMutation.isPending}
+            onAddRow={addRowMutation.mutate}
           />
         </div>
       </form>

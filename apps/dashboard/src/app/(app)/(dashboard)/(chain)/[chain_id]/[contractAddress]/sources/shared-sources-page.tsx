@@ -3,7 +3,7 @@ import type { ProjectMeta } from "../../../../../team/[team_slug]/[project_slug]
 import { redirectToContractLandingPage } from "../../../../../team/[team_slug]/[project_slug]/contract/[chainIdOrSlug]/[contractAddress]/utils";
 import { getContractPageParamsInfo } from "../_utils/getContractFromParams";
 import { shouldRenderNewPublicPage } from "../_utils/newPublicPage";
-import { ContractSourcesPage } from "./ContractSourcesPage";
+import { ContractSourcesPage } from "./components/ContractSourcesPage";
 
 export async function SharedContractSourcesPage(props: {
   contractAddress: string;
@@ -11,8 +11,8 @@ export async function SharedContractSourcesPage(props: {
   projectMeta: ProjectMeta | undefined;
 }) {
   const info = await getContractPageParamsInfo({
-    contractAddress: props.contractAddress,
     chainIdOrSlug: props.chainIdOrSlug,
+    contractAddress: props.contractAddress,
     teamId: props.projectMeta?.teamId,
   });
 
@@ -25,8 +25,8 @@ export async function SharedContractSourcesPage(props: {
     const shouldHide = await shouldRenderNewPublicPage(info.serverContract);
     if (shouldHide) {
       redirectToContractLandingPage({
-        contractAddress: props.contractAddress,
         chainIdOrSlug: props.chainIdOrSlug,
+        contractAddress: props.contractAddress,
         projectMeta: props.projectMeta,
       });
     }

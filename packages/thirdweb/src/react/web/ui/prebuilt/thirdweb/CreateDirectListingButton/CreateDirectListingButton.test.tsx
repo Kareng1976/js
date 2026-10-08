@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import { render, screen } from "~test/react-render.js";
 import { TEST_CLIENT } from "~test/test-clients.js";
@@ -13,12 +14,12 @@ describe.runIf(process.env.TW_SECRET_KEY)("BuyDirectListingButton", () => {
   it("should render", () => {
     render(
       <CreateDirectListingButton
-        client={client}
-        chain={sepolia}
-        contractAddress={marketplaceAddress}
         assetContractAddress="0x3cf279b3248E164F3e5C341826B878d350EC6AB1"
-        tokenId={0n}
+        chain={sepolia}
+        client={client}
+        contractAddress={marketplaceAddress}
         pricePerToken="0.1"
+        tokenId={0n}
       >
         Sell NFT
       </CreateDirectListingButton>,

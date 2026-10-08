@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it, vi } from "vitest";
 import {
   fireEvent,
@@ -14,14 +15,14 @@ describe("ConnectWalletSocialOptions", () => {
   const mockDone = vi.fn();
 
   const defaultProps = {
-    select: mockSelect,
-    done: mockDone,
-    locale: en,
     chain: undefined,
     client: TEST_CLIENT,
-    size: "compact" as const,
-    isLinking: false,
     disabled: false,
+    done: mockDone,
+    isLinking: false,
+    locale: en,
+    select: mockSelect,
+    size: "compact" as const,
   };
 
   it("renders Sign in with Wallet button when enabled and not linking", () => {

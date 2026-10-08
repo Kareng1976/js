@@ -1,21 +1,20 @@
 import "server-only";
 
-// others
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import * as parserBabel from "prettier/plugins/babel";
 // prettier
 import { format } from "prettier/standalone";
 import {
   type BuiltinLanguage,
-  type SpecialLanguage,
-  type ThemedToken,
   codeToTokens,
+  type SpecialLanguage,
   stringifyTokenStyle,
+  type ThemedToken,
 } from "shiki";
-
+import { ScrollShadow } from "@/components/ui/ScrollShadow";
+// others
+import { cn } from "@/lib/utils";
 import { CopyButton } from "../others/CopyButton";
-import { ScrollShadow } from "../others/ScrollShadow/ScrollShadow";
 
 const jsOrTsLangs = new Set([
   "js",
@@ -68,14 +67,14 @@ export async function CodeBlock(props: {
     <div className={cn("group/code relative mb-5", props.containerClassName)}>
       <code
         className={cn(
-          "relative block whitespace-pre rounded-lg border bg-card font-mono text-sm leading-relaxed",
+          "relative block whitespace-pre rounded-lg border bg-card dark:bg-background font-mono text-sm leading-relaxed",
           props.className,
         )}
         lang={lang}
       >
         <ScrollShadow
           scrollableClassName={cn("p-4", props.scrollContainerClassName)}
-          className=""
+          shadowColor="hsl(var(--card))"
         >
           <RenderCode code={code} lang={lang} tokenLinks={tokenLinks} />
         </ScrollShadow>
@@ -96,16 +95,16 @@ async function RenderCode(props: {
   const { tokens } = await codeToTokens(props.code, {
     lang: (props.lang || "javascript") as BuiltinLanguage | SpecialLanguage,
     themes: {
-      light: "github-light",
       dark: "github-dark-dimmed",
+      light: "github-light",
     },
   });
 
   const getThemeColors = (token: ThemedToken) => {
     if (!token.htmlStyle) {
       return {
-        lightColor: undefined,
         darkColor: undefined,
+        lightColor: undefined,
       };
     }
     const styleStr = stringifyTokenStyle(token.htmlStyle);
@@ -113,8 +112,8 @@ async function RenderCode(props: {
     const lightColor = lightStyle?.split(":")[1];
     const darkColor = darkStyle?.split(":")[1];
     return {
-      lightColor,
       darkColor,
+      lightColor,
     };
   };
 
@@ -128,8 +127,8 @@ async function RenderCode(props: {
               const { lightColor, darkColor } = getThemeColors(token);
 
               const style = {
-                "--code-light-color": lightColor,
                 "--code-dark-color": darkColor,
+                "--code-light-color": lightColor,
               } as React.CSSProperties;
 
               const href = props.tokenLinks?.has(token.content)
@@ -139,10 +138,10 @@ async function RenderCode(props: {
               if (href) {
                 return (
                   <Link
+                    className="group/codelink relative py-0.5"
+                    href={href || "#"}
                     // biome-ignore lint/suspicious/noArrayIndexKey: index is the identity here
                     key={i}
-                    href={href || "#"}
-                    className="group/codelink relative py-0.5"
                     style={style}
                   >
                     {/* Token */}
@@ -163,7 +162,7 @@ async function RenderCode(props: {
 
               return (
                 // biome-ignore lint/suspicious/noArrayIndexKey: index is the identity here
-                <span key={i} style={style} data-token={token.content}>
+                <span data-token={token.content} key={i} style={style}>
                   {token.content}
                 </span>
               );

@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { FC } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -20,12 +21,12 @@ import {
   ConnectedToSmartWallet,
   ConnectedWalletDetails,
   DetailsModal,
+  detailsBtn_formatFiatBalanceForButton,
+  detailsBtn_formatTokenBalanceForButton,
   InAppWalletUserInfo,
   NetworkSwitcherButton,
   StyledChevronRightIcon,
   SwitchNetworkButton,
-  detailsBtn_formatFiatBalanceForButton,
-  detailsBtn_formatTokenBalanceForButton,
   useWalletDetailsModal,
 } from "./Details.js";
 import en from "./locale/en.js";
@@ -57,17 +58,17 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
-            detailsButton={undefined}
-            detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
-            onDisconnect={() => {}}
             chains={[]}
-            switchButton={undefined}
             client={client}
             connectLocale={en}
             connectOptions={undefined}
+            detailsButton={undefined}
+            detailsModal={undefined}
+            onDisconnect={() => {}}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
+            switchButton={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -82,19 +83,19 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               showBalanceInFiat: "USD",
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={undefined}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -109,19 +110,19 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               render: () => <p className="thirdweb_tw" />,
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={undefined}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -136,7 +137,10 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               style: {
                 color: "red",
@@ -144,14 +148,11 @@ describe("Details button", () => {
               },
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={undefined}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -172,17 +173,17 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
-            detailsButton={undefined}
-            detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
-            onDisconnect={() => {}}
             chains={[]}
-            switchButton={undefined}
             client={client}
             connectLocale={en}
             connectOptions={undefined}
+            detailsButton={undefined}
+            detailsModal={undefined}
+            onDisconnect={() => {}}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
+            switchButton={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -199,17 +200,17 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
-            detailsButton={undefined}
-            detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
-            onDisconnect={() => {}}
             chains={[]}
-            switchButton={undefined}
             client={client}
             connectLocale={en}
             connectOptions={undefined}
+            detailsButton={undefined}
+            detailsModal={undefined}
+            onDisconnect={() => {}}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
+            switchButton={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -226,19 +227,19 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               connectedAccountName: "test name",
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={undefined}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -256,19 +257,19 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               connectedAccountAvatarUrl: "https://thirdweb.com/cat.png",
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={undefined}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -284,19 +285,19 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               connectedAccountName: "test name",
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={undefined}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -320,26 +321,26 @@ describe("Details button", () => {
       <QueryClientProvider client={queryClient}>
         <AccountProvider address={VITALIK_WALLET} client={client}>
           <ConnectedWalletDetails
-            theme={"dark"}
+            chain={ethereum}
+            chains={[]}
+            client={client}
+            connectLocale={en}
+            connectOptions={undefined}
             detailsButton={{
               connectedAccountName: "test name",
             }}
             detailsModal={undefined}
-            supportedTokens={undefined}
-            supportedNFTs={undefined}
             onDisconnect={() => {}}
-            chains={[]}
+            supportedNFTs={undefined}
+            supportedTokens={undefined}
             switchButton={{
+              className: "thirdwebSwitchBtn",
+              label: "switchbtn",
               style: {
                 color: "red",
               },
-              className: "thirdwebSwitchBtn",
-              label: "switchbtn",
             }}
-            client={client}
-            connectLocale={en}
-            connectOptions={undefined}
-            chain={ethereum}
+            theme={"dark"}
           />
         </AccountProvider>
       </QueryClientProvider>,
@@ -409,7 +410,7 @@ describe("useWalletDetailsModal", () => {
 describe("SwitchNetworkButton", () => {
   it("should render a default button", () => {
     const { container } = render(
-      <SwitchNetworkButton targetChain={ethereum} connectLocale={en} />,
+      <SwitchNetworkButton connectLocale={en} targetChain={ethereum} />,
     );
     const element = container.querySelector(
       "button.tw-connect-wallet--switch-network",
@@ -420,9 +421,9 @@ describe("SwitchNetworkButton", () => {
   it("should apply the style properly", () => {
     const { container } = render(
       <SwitchNetworkButton
-        targetChain={ethereum}
         connectLocale={en}
         style={{ color: "red", width: "4444px" }}
+        targetChain={ethereum}
       />,
     );
     const element = container.querySelector(
@@ -439,9 +440,9 @@ describe("SwitchNetworkButton", () => {
   it("should apply the className properly", () => {
     const { container } = render(
       <SwitchNetworkButton
-        targetChain={ethereum}
-        connectLocale={en}
         className="thirdwebRocks"
+        connectLocale={en}
+        targetChain={ethereum}
       />,
     );
     const element = container.querySelector("button.thirdwebRocks");
@@ -450,7 +451,7 @@ describe("SwitchNetworkButton", () => {
 
   it("should render button's text with locale.switchNetwork by default", () => {
     const { container } = render(
-      <SwitchNetworkButton targetChain={ethereum} connectLocale={en} />,
+      <SwitchNetworkButton connectLocale={en} targetChain={ethereum} />,
     );
     const element = container.querySelector(
       "button.tw-connect-wallet--switch-network",
@@ -464,9 +465,9 @@ describe("SwitchNetworkButton", () => {
   it("should render `switchNetworkBtnTitle` properly", () => {
     const { container } = render(
       <SwitchNetworkButton
-        targetChain={ethereum}
         connectLocale={en}
         switchNetworkBtnTitle="cat"
+        targetChain={ethereum}
       />,
     );
     const element = container.querySelector(
@@ -523,18 +524,18 @@ describe("Details Modal", () => {
 
     render(
       <DetailsModal
-        client={TEST_CLIENT}
-        locale={locale}
-        detailsModal={mockDetailsModalOptions}
-        theme="light"
-        supportedTokens={mockSupportedTokens}
-        supportedNFTs={mockSupportedNFTs}
-        closeModal={closeModalMock}
-        onDisconnect={mockOnDisconnect}
-        chains={mockChains}
-        displayBalanceToken={mockDisplayBalanceToken}
-        connectOptions={mockConnectOptions}
         assetTabs={mockAssetTabs}
+        chains={mockChains}
+        client={TEST_CLIENT}
+        closeModal={closeModalMock}
+        connectOptions={mockConnectOptions}
+        detailsModal={mockDetailsModalOptions}
+        displayBalanceToken={mockDisplayBalanceToken}
+        locale={locale}
+        onDisconnect={mockOnDisconnect}
+        supportedNFTs={mockSupportedNFTs}
+        supportedTokens={mockSupportedTokens}
+        theme="light"
       />,
     );
 
@@ -549,18 +550,18 @@ describe("Details Modal", () => {
 
     render(
       <DetailsModal
-        client={TEST_CLIENT}
-        locale={locale}
-        theme="light"
-        closeModal={closeModalMock}
-        onDisconnect={mockOnDisconnect}
         chains={mockChains}
+        client={TEST_CLIENT}
+        closeModal={closeModalMock}
         connectOptions={mockConnectOptions}
+        locale={locale}
+        onDisconnect={mockOnDisconnect}
+        theme="light"
       />,
     );
 
     // Add assertions to check if the modal is rendered correctly
-    expect(screen.getByText("Connect Modal")).toBeInTheDocument();
+    expect(screen.getByText("Manage Wallet")).toBeInTheDocument();
   });
 
   it("should call closeModal when the close button is clicked", async () => {
@@ -569,13 +570,13 @@ describe("Details Modal", () => {
 
     render(
       <DetailsModal
-        client={TEST_CLIENT}
-        locale={locale}
-        theme="light"
-        closeModal={closeModalMock}
-        onDisconnect={mockOnDisconnect}
         chains={mockChains}
+        client={TEST_CLIENT}
+        closeModal={closeModalMock}
         connectOptions={mockConnectOptions}
+        locale={locale}
+        onDisconnect={mockOnDisconnect}
+        theme="light"
       />,
     );
 
@@ -591,10 +592,10 @@ describe("Details Modal", () => {
     const { container } = render(
       <AccountProvider address={VITALIK_WALLET} client={client}>
         <NetworkSwitcherButton
-          setScreen={(scr) => console.log(scr)}
+          client={client}
           disableSwitchChain={false}
           displayBalanceToken={undefined}
-          client={client}
+          setScreen={(_scr) => {}}
         />
       </AccountProvider>,
     );
@@ -616,10 +617,10 @@ describe("Details Modal", () => {
     const { container } = render(
       <AccountProvider address={VITALIK_WALLET} client={client}>
         <NetworkSwitcherButton
-          setScreen={(scr) => console.log(scr)}
+          client={client}
           disableSwitchChain={false}
           displayBalanceToken={undefined}
-          client={client}
+          setScreen={(_scr) => {}}
         />
       </AccountProvider>,
     );

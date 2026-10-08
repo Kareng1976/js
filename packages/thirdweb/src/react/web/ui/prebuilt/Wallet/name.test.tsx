@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+/** biome-ignore-all lint/nursery/useUniqueElementIds: FIXME: do not use "id" as a prop on JSX elements */
 import { describe, expect, it } from "vitest";
 import { render, waitFor } from "~test/react-render.js";
 import { getFunctionId } from "../../../../../utils/function-id.js";
@@ -23,7 +25,7 @@ describe.runIf(process.env.TW_SECRET_KEY)("WalletName", () => {
 
   it("fetchWalletName should work with formatFn", async () => {
     const formatFn = (str: string) => `${str} Wallet`;
-    expect(await fetchWalletName({ id: "io.metamask", formatFn })).toBe(
+    expect(await fetchWalletName({ formatFn, id: "io.metamask" })).toBe(
       "MetaMask Wallet",
     );
   });
@@ -38,7 +40,7 @@ describe.runIf(process.env.TW_SECRET_KEY)("WalletName", () => {
   it("getQueryKeys should work WITH a formatFn", () => {
     const fn = (str: string) => `test:${str}`;
     const fnId = getFunctionId(fn);
-    expect(getQueryKeys({ id: "ai.hacken", formatFn: fn })).toStrictEqual([
+    expect(getQueryKeys({ formatFn: fn, id: "ai.hacken" })).toStrictEqual([
       "walletName",
       "ai.hacken",
       { resolver: fnId },

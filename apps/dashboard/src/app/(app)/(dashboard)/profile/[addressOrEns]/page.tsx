@@ -1,11 +1,11 @@
-import { getClientThirdwebClient } from "@/constants/thirdweb-client.client";
-import { serverThirdwebClient } from "@/constants/thirdweb-client.server";
-import { replaceDeployerAddress } from "lib/publisher-utils";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { shortenIfAddress } from "utils/usedapp-external";
+import { getClientThirdwebClient } from "@/constants/thirdweb-client.client";
+import { serverThirdwebClient } from "@/constants/thirdweb-client.server";
+import { replaceDeployerAddress } from "@/lib/publisher-utils";
+import { resolveAddressAndEns } from "@/utils/resolveAddressAndEns";
+import { shortenIfAddress } from "@/utils/usedapp-external";
 import { ProfileUI } from "./ProfileUI";
-import { resolveAddressAndEns } from "./resolveAddressAndEns";
 
 type PageProps = {
   params: Promise<{
@@ -26,9 +26,9 @@ export default async function Page(props: PageProps) {
 
   return (
     <ProfileUI
+      client={getClientThirdwebClient()}
       ensName={replaceDeployerAddress(resolvedInfo.ensName || "")}
       profileAddress={resolvedInfo.address}
-      client={getClientThirdwebClient()}
     />
   );
 }
@@ -52,11 +52,11 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const description = `Visit ${displayName}'s profile. See their published contracts and deploy them in one click.`;
 
   return {
-    title,
     description,
     openGraph: {
-      title,
       description,
+      title,
     },
+    title,
   };
 }

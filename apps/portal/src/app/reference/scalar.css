@@ -1,0 +1,5 @@
+.scalar-app {
+  --scalar-background-1: hsl(var(--background));
+  --scalar-background-2: hsl(var(--card));
+  --scalar-custom-header-height: var(--sticky-top-height);
+}

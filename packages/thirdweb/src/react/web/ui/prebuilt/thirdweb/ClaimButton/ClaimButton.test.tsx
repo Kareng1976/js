@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import { ANVIL_CHAIN } from "~test/chains.js";
 import { TEST_CONTRACT_URI } from "~test/ipfs-uris.js";
@@ -28,20 +29,20 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
 
   it("should work for an NFT Drop contract", async () => {
     const address = await deployERC721Contract({
-      client,
+      account,
       chain,
-      account,
-      type: "DropERC721",
+      client,
       params: {
-        name: "",
         contractURI: TEST_CONTRACT_URI,
+        name: "",
       },
+      type: "DropERC721",
     });
-    const contract = getContract({ address, client, chain });
+    const contract = getContract({ address, chain, client });
     const result = await getERC721ClaimTo({
-      contract,
       account,
-      claimParams: { type: "ERC721", quantity: 1n },
+      claimParams: { quantity: 1n, type: "ERC721" },
+      contract,
     });
 
     expect(result.to).toBe(address);
@@ -52,10 +53,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
     // should also render <ClaimButton />
     render(
       <ClaimButton
-        client={client}
         chain={chain}
-        contractAddress={address}
         claimParams={{ quantity: 1n, type: "ERC721" }}
+        client={client}
+        contractAddress={address}
       >
         Claim
       </ClaimButton>,
@@ -66,20 +67,20 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
 
   it("should work for an Edition Drop contract", async () => {
     const address = await deployERC1155Contract({
-      client,
+      account,
       chain,
-      account,
-      type: "DropERC1155",
+      client,
       params: {
-        name: "",
         contractURI: TEST_CONTRACT_URI,
+        name: "",
       },
+      type: "DropERC1155",
     });
-    const contract = getContract({ address, client, chain });
+    const contract = getContract({ address, chain, client });
     const result = await getERC1155ClaimTo({
-      contract,
       account,
-      claimParams: { type: "ERC1155", quantity: 1n, tokenId: 0n },
+      claimParams: { quantity: 1n, tokenId: 0n, type: "ERC1155" },
+      contract,
     });
     expect(result.to).toBe(address);
     expect(result.chain.id).toBe(chain.id);
@@ -89,10 +90,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
     // should also render <ClaimButton />
     render(
       <ClaimButton
-        client={client}
         chain={chain}
+        claimParams={{ quantity: 1n, tokenId: 0n, type: "ERC1155" }}
+        client={client}
         contractAddress={address}
-        claimParams={{ quantity: 1n, type: "ERC1155", tokenId: 0n }}
       >
         Claim
       </ClaimButton>,
@@ -103,42 +104,42 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
 
   it("should throw an error if claim quantity / quantityInWei is not passed", async () => {
     const address = await deployERC20Contract({
-      client,
-      chain,
       account,
-      type: "DropERC20",
+      chain,
+      client,
       params: {
-        name: "",
         contractURI: TEST_CONTRACT_URI,
+        name: "",
       },
+      type: "DropERC20",
     });
     const contract = getContract({ address, chain, client });
     await expect(
       getERC20ClaimTo({
-        contract,
         account,
         // @ts-ignore Intended for the test
         claimParams: { type: "ERC20" },
+        contract,
       }),
     ).rejects.toThrowError("Missing quantity or quantityInWei");
   });
 
   it("should work for an Token Drop contract + quantity", async () => {
     const address = await deployERC20Contract({
-      client,
-      chain,
       account,
-      type: "DropERC20",
+      chain,
+      client,
       params: {
-        name: "",
         contractURI: TEST_CONTRACT_URI,
+        name: "",
       },
+      type: "DropERC20",
     });
     const contract = getContract({ address, chain, client });
     const result = await getERC20ClaimTo({
-      contract,
       account,
-      claimParams: { type: "ERC20", quantity: "1" },
+      claimParams: { quantity: "1", type: "ERC20" },
+      contract,
     });
     expect(result.to).toBe(address);
     expect(result.chain.id).toBe(chain.id);
@@ -148,10 +149,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
     // should also render <ClaimButton />
     render(
       <ClaimButton
-        client={client}
         chain={chain}
-        contractAddress={address}
         claimParams={{ quantity: "100", type: "ERC20" }}
+        client={client}
+        contractAddress={address}
       >
         Claim
       </ClaimButton>,
@@ -162,20 +163,20 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
 
   it("should work for an Token Drop contract + quantityInWei", async () => {
     const address = await deployERC20Contract({
-      client,
-      chain,
       account,
-      type: "DropERC20",
+      chain,
+      client,
       params: {
-        name: "",
         contractURI: TEST_CONTRACT_URI,
+        name: "",
       },
+      type: "DropERC20",
     });
     const contract = getContract({ address, chain, client });
     const result = await getERC20ClaimTo({
-      contract,
       account,
-      claimParams: { type: "ERC20", quantityInWei: 1000000n },
+      claimParams: { quantityInWei: 1000000n, type: "ERC20" },
+      contract,
     });
     expect(result.to).toBe(address);
     expect(result.chain.id).toBe(chain.id);
@@ -185,10 +186,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("ClaimButton", () => {
     // should also render <ClaimButton />
     render(
       <ClaimButton
-        client={client}
         chain={chain}
-        contractAddress={address}
         claimParams={{ quantityInWei: 1000000n, type: "ERC20" }}
+        client={client}
+        contractAddress={address}
       >
         Claim
       </ClaimButton>,

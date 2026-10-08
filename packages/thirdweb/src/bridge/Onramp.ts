@@ -1,22 +1,24 @@
 import type { Address as ox__Address } from "ox";
+import { defineChain } from "../chains/utils.js";
 import type { ThirdwebClient } from "../client/client.js";
+import type { PurchaseData } from "../pay/types.js";
 import { getThirdwebBaseUrl } from "../utils/domains.js";
 import { getClientFetch } from "../utils/fetch.js";
 import { stringify } from "../utils/json.js";
 import { ApiError } from "./types/Errors.js";
 import type { RouteStep } from "./types/Route.js";
-import type { Token } from "./types/Token.js";
+import type { TokenWithPrices } from "./types/Token.js";
 
 // export status within the Onramp module
 export { status } from "./OnrampStatus.js";
 
 type OnrampIntent = {
-  onramp: "stripe" | "coinbase" | "transak";
+  onramp: "stripe" | "coinbase" | "transak" | "rampnow";
   chainId: number;
   tokenAddress: ox__Address.Address;
   receiver: ox__Address.Address;
   amount?: string; // Corresponds to buyAmountWei in some other contexts
-  purchaseData?: unknown;
+  purchaseData?: PurchaseData;
   sender?: ox__Address.Address;
   onrampTokenAddress?: ox__Address.Address;
   onrampChainId?: number;
@@ -31,7 +33,7 @@ type OnrampPrepareQuoteResponseData = {
   currency: string;
   currencyAmount: number;
   destinationAmount: bigint;
-  destinationToken: Token;
+  destinationToken: TokenWithPrices;
   timestamp?: number;
   expiration?: number;
   steps: RouteStep[];
@@ -40,12 +42,12 @@ type OnrampPrepareQuoteResponseData = {
 
 // Explicit type for the API request body
 interface OnrampApiRequestBody {
-  onramp: "stripe" | "coinbase" | "transak";
+  onramp: "stripe" | "coinbase" | "transak" | "rampnow";
   chainId: number;
   tokenAddress: ox__Address.Address;
   receiver: ox__Address.Address;
   amount?: string;
-  purchaseData?: unknown;
+  purchaseData?: PurchaseData;
   sender?: ox__Address.Address;
   onrampTokenAddress?: ox__Address.Address;
   onrampChainId?: number;
@@ -126,7 +128,7 @@ interface OnrampApiRequestBody {
  *
  * @param options - The options for preparing the onramp.
  * @param options.client - Your thirdweb client.
- * @param options.onramp - The onramp provider to use (e.g., "stripe", "coinbase", "transak").
+ * @param options.onramp - The onramp provider to use (e.g., "stripe", "coinbase", "transak", "rampnow").
  * @param options.chainId - The destination chain ID.
  * @param options.tokenAddress - The destination token address.
  * @param options.receiver - The address that will receive the output token.
@@ -170,10 +172,10 @@ export async function prepare(
   const url = `${getThirdwebBaseUrl("bridge")}/v1/onramp/prepare`;
 
   const apiRequestBody: OnrampApiRequestBody = {
-    onramp,
     chainId: Number(chainId),
-    tokenAddress,
+    onramp,
     receiver,
+    tokenAddress,
   };
 
   if (amount !== undefined) {
@@ -210,19 +212,19 @@ export async function prepare(
   }
 
   const response = await clientFetch(url, {
-    method: "POST",
+    body: stringify(apiRequestBody),
     headers: {
       "Content-Type": "application/json",
     },
-    body: stringify(apiRequestBody),
+    method: "POST",
   });
 
   if (!response.ok) {
     const errorJson = await response.json();
     throw new ApiError({
       code: errorJson.code || "UNKNOWN_ERROR",
-      message: errorJson.message || response.statusText,
       correlationId: errorJson.correlationId || undefined,
+      message: errorJson.message || response.statusText,
       statusCode: response.status,
     });
   }
@@ -233,10 +235,12 @@ export async function prepare(
   // Transform amounts from string to bigint where appropriate
   const transformedSteps = data.steps.map((step) => ({
     ...step,
-    originAmount: BigInt(step.originAmount),
     destinationAmount: BigInt(step.destinationAmount),
+    originAmount: BigInt(step.originAmount),
     transactions: step.transactions.map((tx) => ({
       ...tx,
+      chain: defineChain(tx.chainId),
+      client,
       value: tx.value ? BigInt(tx.value) : undefined,
     })),
   }));
@@ -249,26 +253,50 @@ export async function prepare(
   return {
     ...data,
     destinationAmount: BigInt(data.destinationAmount),
-    steps: transformedSteps,
     intent: intentFromResponse,
+    steps: transformedSteps,
   };
 }
 
+/**
+ * Namespace containing types for the onramp prepare function.
+ * @namespace prepare
+ * @bridge Onramp
+ */
 export declare namespace prepare {
+  /**
+   * Options for preparing an onramp transaction.
+   * @interface Options
+   * @bridge Onramp
+   */
   export type Options = {
+    /** Your thirdweb client */
     client: ThirdwebClient;
-    onramp: "stripe" | "coinbase" | "transak";
+    /** The onramp provider to use (e.g., "stripe", "coinbase", "transak", "rampnow") */
+    onramp: "stripe" | "coinbase" | "transak" | "rampnow";
+    /** The destination chain ID */
     chainId: number;
+    /** The destination token address */
     tokenAddress: ox__Address.Address;
+    /** The address that will receive the output token */
     receiver: ox__Address.Address;
+    /** The desired token amount in wei */
     amount?: bigint;
-    purchaseData?: unknown;
+    /** Arbitrary purchase data */
+    purchaseData?: PurchaseData;
+    /** An optional address to associate as the onramp sender */
     sender?: ox__Address.Address;
+    /** The token to initially onramp to if the destination token is not supported by the provider */
     onrampTokenAddress?: ox__Address.Address;
+    /** The chain ID to initially onramp to if the destination chain is not supported */
     onrampChainId?: number;
+    /** The currency for the onramp (e.g., "USD", "GBP"). Defaults to user's preferred or "USD" */
     currency?: string;
+    /** Maximum number of post-onramp steps */
     maxSteps?: number;
+    /** Chain IDs to exclude from the route (string or array of strings) */
     excludeChainIds?: string | string[];
+    /** The user's country code (e.g. "US", "JP"). Defaults to "US". We highly recommend this be set (based on the user's IP address) */
     country?: string;
     /**
      * @hidden
@@ -276,5 +304,11 @@ export declare namespace prepare {
     paymentLinkId?: string;
   };
 
+  /**
+   * Result returned from preparing an onramp transaction.
+   * Contains the onramp link, quote information, and routing steps.
+   * @interface Result
+   * @bridge Onramp
+   */
   export type Result = OnrampPrepareQuoteResponseData;
 }

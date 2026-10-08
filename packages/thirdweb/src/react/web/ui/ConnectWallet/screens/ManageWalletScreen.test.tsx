@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "../../../../../../test/src/react-render.js";
 import { TEST_CLIENT } from "../../../../../../test/src/test-clients.js";
@@ -10,11 +11,11 @@ vi.mock("../../../../core/hooks/wallets/useAdminWallet");
 
 describe("ManageWalletScreen", () => {
   const mockProps = {
-    onBack: vi.fn(),
-    setScreen: vi.fn(),
+    client: TEST_CLIENT,
     closeModal: vi.fn(),
     locale: en,
-    client: TEST_CLIENT,
+    onBack: vi.fn(),
+    setScreen: vi.fn(),
   };
 
   beforeEach(() => {

@@ -50,8 +50,8 @@ export function verifyLoginPayload(options: AuthOptions) {
     // check that the intended domain matches the domain of the payload
     if (payload.domain !== options.domain) {
       return {
-        valid: false,
         error: `Expected domain '${options.domain}' does not match domain on payload '${payload.domain}'`,
+        valid: false,
       };
     }
 
@@ -59,24 +59,24 @@ export function verifyLoginPayload(options: AuthOptions) {
     // check that the payload statement matches the expected statement
     if (statement !== payload.statement) {
       return {
-        valid: false,
         error: `Expected statement '${statement}' does not match statement on payload '${payload.statement}'`,
+        valid: false,
       };
     }
 
     // compare uri if it is defined
     if (options.login?.uri && options.login.uri !== payload.uri) {
       return {
-        valid: false,
         error: `Expected uri '${options.login.uri}' does not match uri on payload '${payload.uri}'`,
+        valid: false,
       };
     }
 
     const version = options.login?.version || DEFAULT_LOGIN_VERSION;
     if (version !== payload.version) {
       return {
-        valid: false,
         error: `Expected version '${version}' does not match version on payload '${payload.version}'`,
+        valid: false,
       };
     }
 
@@ -86,31 +86,47 @@ export function verifyLoginPayload(options: AuthOptions) {
         const isValid = await options.login.nonce.validate(payload.nonce);
         if (!isValid) {
           return {
-            valid: false,
             error: `Invalid nonce '${payload.nonce}'`,
+            valid: false,
           };
         }
       } catch {
         return {
-          valid: false,
           error: `Vailed to validate nonce '${payload.nonce}'`,
+          valid: false,
         };
       }
     }
 
     const currentDate = new Date();
 
-    if (currentDate < new Date(payload.invalid_before)) {
+    // Invalid Date comparisons are always false in JS, so unparseable
+    // invalid_before / expiration_time previously skipped time bounds.
+    const notBefore = new Date(payload.invalid_before);
+    if (Number.isNaN(notBefore.getTime())) {
       return {
+        error: "Payload has invalid Not Before time",
         valid: false,
+      };
+    }
+    if (currentDate < notBefore) {
+      return {
         error: "Payload is not yet valid",
+        valid: false,
       };
     }
 
-    if (currentDate > new Date(payload.expiration_time)) {
+    const expiration = new Date(payload.expiration_time);
+    if (Number.isNaN(expiration.getTime())) {
       return {
+        error: "Payload has invalid Expiration Time",
         valid: false,
+      };
+    }
+    if (currentDate > expiration) {
+      return {
         error: "Payload has expired",
+        valid: false,
       };
     }
 
@@ -120,10 +136,10 @@ export function verifyLoginPayload(options: AuthOptions) {
       );
       if (missingResources.length > 0) {
         return {
-          valid: false,
           error: `Login request is missing required resources: ${missingResources.join(
             ", ",
           )}`,
+          valid: false,
         };
       }
     }
@@ -132,25 +148,25 @@ export function verifyLoginPayload(options: AuthOptions) {
     const computedMessage = createLoginMessage(payload);
 
     const signatureIsValid = await verifySignature({
-      message: computedMessage,
-      signature: signature,
       address: payload.address,
       chain: payload.chain_id
         ? getCachedChain(Number.parseInt(payload.chain_id))
         : undefined,
       client: options.client,
+      message: computedMessage,
+      signature: signature,
     });
 
     if (!signatureIsValid) {
       return {
-        valid: false,
         error: "Invalid signature",
+        valid: false,
       };
     }
 
     return {
-      valid: true,
       payload: { ...payload, [VERIFIED_SYMBOL]: true },
+      valid: true,
     };
   };
 
@@ -163,14 +179,14 @@ export function verifyLoginPayload(options: AuthOptions) {
     // We can only track logins if the client is provided
     if (options.client) {
       trackLogin({
-        client: options.client,
-        walletAddress: payload.address,
         chainId: payload.chain_id
           ? Number.parseInt(payload.chain_id)
           : undefined,
+        client: options.client,
         error: !result.valid
-          ? { message: result.error, code: "401" }
+          ? { code: "401", message: result.error }
           : undefined,
+        walletAddress: payload.address,
       });
     }
 

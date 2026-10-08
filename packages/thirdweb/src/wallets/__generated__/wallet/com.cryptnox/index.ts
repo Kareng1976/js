@@ -5,15 +5,15 @@ export const wallet = {
   id: "com.cryptnox",
   name: "Cryptnox Wallet",
   homepage: "https://cryptnox.com",
-  image_id: "2947b7c8-8966-4485-a98d-25fe43c16700",
+  image_id: "7682ef2f-81b6-41cb-caa5-cb697beda300",
   app: {
     browser: "https://cryptnox.com",
     ios: "https://apps.apple.com/app/id1583011693",
     android:
       "https://play.google.com/store/apps/details?id=com.cryptnox.cryptnoxwallet",
-    mac: null,
-    windows: null,
-    linux: null,
+    mac: "",
+    windows: "",
+    linux: "",
     chrome: null,
     firefox: null,
     safari: null,
@@ -23,10 +23,10 @@ export const wallet = {
   rdns: null,
   mobile: {
     native: "cryptnox://",
-    universal: null,
+    universal: "",
   },
   desktop: {
-    native: null,
+    native: "",
     universal: "https://cryptnox.com",
   },
 } as const;

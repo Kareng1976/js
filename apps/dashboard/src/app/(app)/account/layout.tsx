@@ -1,20 +1,17 @@
-import { getProjects } from "@/api/projects";
-import { type Team, getTeams } from "@/api/team";
-import { AppFooter } from "@/components/blocks/app-footer";
-import { TabPathLinks } from "@/components/ui/tabs";
-import { getClientThirdwebClient } from "@/constants/thirdweb-client.client";
-import type { Account } from "@3rdweb-sdk/react/hooks/useApi";
-import { AnnouncementBanner } from "components/notices/AnnouncementBanner";
 import type React from "react";
 import type { ThirdwebClient } from "thirdweb";
-import {
-  getAuthToken,
-  getAuthTokenWalletAddress,
-} from "../api/lib/getAuthToken";
+import { getValidAccount } from "@/api/account/get-account";
+import { getAuthToken, getAuthTokenWalletAddress } from "@/api/auth-token";
+import { getProjects } from "@/api/project/projects";
+import { getTeams, type Team } from "@/api/team/get-team";
+import { AppFooter } from "@/components/footers/app-footer";
+import { AnnouncementBanner } from "@/components/misc/AnnouncementBanner";
+import { TabPathLinks } from "@/components/ui/tabs";
+import { getClientThirdwebClient } from "@/constants/thirdweb-client.client";
+import type { Account } from "@/hooks/useApi";
+import { loginRedirect } from "@/utils/redirects";
 import { TWAutoConnect } from "../components/autoconnect";
-import { loginRedirect } from "../login/loginRedirect";
 import { AccountHeader } from "./components/AccountHeader";
-import { getValidAccount } from "./settings/getAccount";
 
 export default async function AccountLayout(props: {
   children: React.ReactNode;
@@ -39,14 +36,14 @@ export default async function AccountLayout(props: {
     <div className="flex min-h-dvh flex-col bg-background">
       <div className="flex grow flex-col">
         <HeaderAndNav
-          teams={teams}
-          twAccount={account}
           accountAddress={accountAddress}
           client={client}
+          teams={teams}
+          twAccount={account}
         />
         {props.children}
       </div>
-      <TWAutoConnect />
+      <TWAutoConnect client={client} />
       <AppFooter />
     </div>
   );
@@ -60,8 +57,8 @@ async function HeaderAndNav(props: {
 }) {
   const teamsAndProjects = await Promise.all(
     props.teams.map(async (team) => ({
-      team,
       projects: await getProjects(team.slug),
+      team,
     })),
   );
 
@@ -69,32 +66,32 @@ async function HeaderAndNav(props: {
     <div className="bg-card">
       <AnnouncementBanner />
       <AccountHeader
-        teamsAndProjects={teamsAndProjects}
         account={props.twAccount}
         accountAddress={props.accountAddress}
         client={props.client}
+        teamsAndProjects={teamsAndProjects}
       />
       <TabPathLinks
-        tabContainerClassName="px-4 lg:px-6"
         links={[
           {
-            path: "/account",
-            name: "Overview",
             exactMatch: true,
+            name: "Overview",
+            path: "/account",
           },
           {
-            path: "/account/settings",
             name: "Settings",
+            path: "/account/settings",
           },
           {
-            path: "/account/wallets",
             name: "Linked Wallets",
+            path: "/account/wallets",
           },
           {
-            path: "/account/devices",
             name: "Devices",
+            path: "/account/devices",
           },
         ]}
+        tabContainerClassName="px-4 lg:px-6"
       />
     </div>
   );

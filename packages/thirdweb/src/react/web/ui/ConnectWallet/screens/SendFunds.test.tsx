@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it, vi } from "vitest";
 import { render } from "~test/react-render.js";
 import { TEST_CLIENT } from "~test/test-clients.js";
@@ -20,15 +21,15 @@ describe("SendFunds screen", () => {
     vi.mocked(useActiveWalletChain).mockReturnValue(base);
     const { container } = render(
       <SendFundsForm
-        token={{ nativeToken: true }}
-        onTokenSelect={() => {}}
-        receiverAddress={TEST_ACCOUNT_A.address}
-        setReceiverAddress={() => {}}
         amount={"1"}
-        setAmount={() => {}}
-        onBack={() => {}}
         client={client}
         connectLocale={en}
+        onBack={() => {}}
+        onTokenSelect={() => {}}
+        receiverAddress={TEST_ACCOUNT_A.address}
+        setAmount={() => {}}
+        setReceiverAddress={() => {}}
+        token={{ nativeToken: true }}
       />,
     );
     const element = container.querySelector("h2");
@@ -47,20 +48,18 @@ describe("SendFunds screen", () => {
     vi.mocked(useActiveWalletChain).mockReturnValue(base);
     const { container } = render(
       <SendFundsForm
-        token={{ nativeToken: true }}
-        onTokenSelect={() => {}}
-        receiverAddress={TEST_ACCOUNT_A.address}
-        setReceiverAddress={() => {}}
         amount={"1"}
-        setAmount={() => {}}
-        onBack={() => {}}
         client={client}
         connectLocale={en}
+        onBack={() => {}}
+        onTokenSelect={() => {}}
+        receiverAddress={TEST_ACCOUNT_A.address}
+        setAmount={() => {}}
+        setReceiverAddress={() => {}}
+        token={{ nativeToken: true }}
       />,
     );
-    const element = container.querySelector(
-      "button.tw-sendfunds-screen-send-button",
-    );
+    const element = container.querySelector("button.tw-send-funds-button");
     expect(element?.innerHTML).toBe(en.sendFundsScreen.submitButton);
     vi.resetAllMocks();
   });

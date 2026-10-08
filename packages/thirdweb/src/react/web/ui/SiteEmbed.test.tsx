@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import { render, waitFor } from "../../../../test/src/react-render.js";
 import { TEST_CLIENT } from "../../../../test/src/test-clients.js";
@@ -7,7 +8,7 @@ describe("SiteEmbed", () => {
   it("renders iframe with correct src", () => {
     const testUrl = "https://thirdweb.com/";
     const { container } = render(
-      <SiteEmbed src={testUrl} client={TEST_CLIENT} />,
+      <SiteEmbed client={TEST_CLIENT} src={testUrl} />,
     );
 
     const iframe = container.querySelector("iframe");
@@ -18,14 +19,14 @@ describe("SiteEmbed", () => {
     const testUrl = "https://thirdweb.com/";
     expect(() =>
       // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
-      render(<SiteEmbed src={testUrl} client={{} as any} />),
+      render(<SiteEmbed client={{} as any} src={testUrl} />),
     ).toThrow("The SiteEmbed client must have a clientId");
   });
 
   it("uses inApp wallet when wallet is a smart wallet", async () => {
     const testUrl = "https://thirdweb.com/";
     const { container } = render(
-      <SiteEmbed src={testUrl} client={TEST_CLIENT} />,
+      <SiteEmbed client={TEST_CLIENT} src={testUrl} />,
       {
         setConnectedWallet: true,
         walletId: "smart",

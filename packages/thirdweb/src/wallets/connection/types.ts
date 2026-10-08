@@ -1,5 +1,6 @@
 import type { Chain } from "../../chains/types.js";
 import type { ThirdwebClient } from "../../client/client.js";
+import type { OnConnectCallback } from "../../react/core/hooks/connection/types.js";
 import type { Wallet } from "../../wallets/interfaces/wallet.js";
 import type { SmartWalletOptions } from "../../wallets/smart/types.js";
 import type { AppMetadata } from "../../wallets/types.js";
@@ -101,13 +102,14 @@ export type AutoConnectProps = {
    *
    * ```tsx
    * <AutoConnect
-   *  onConnect={(wallet) => {
-   *    console.log("auto connected to", wallet)
+   *  onConnect={(activeWallet, allConnectedWallets) => {
+   *    console.log("auto connected to", activeWallet)
+   *    console.log("all connected wallets", allConnectedWallets)
    *  }}
    * />
    * ```
    */
-  onConnect?: (wallet: Wallet) => void;
+  onConnect?: OnConnectCallback;
 
   /**
    * Optional chain to autoconnect to
@@ -118,6 +120,20 @@ export type AutoConnectProps = {
    * Callback to be called when the connection is timeout-ed
    */
   onTimeout?: () => void;
+
+  /**
+   * Whether to read wallet auth material (such as an auth token or cookie) from the
+   * current page URL when auto-connecting.
+   *
+   * The redirect-based in-app wallet login and the `SiteLink` / `SiteEmbed` components
+   * pass auth material via URL parameters, which `AutoConnect` reads to restore the
+   * session. Set this to `false` to disable reading auth material from the URL entirely
+   * — useful if your app only uses popup, OTP, or passkey login and never hands off a
+   * session between sites.
+   *
+   * @default true
+   */
+  readUrlToken?: boolean;
 
   /**
    * @hidden

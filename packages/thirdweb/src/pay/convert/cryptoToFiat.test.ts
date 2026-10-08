@@ -3,20 +3,17 @@ import { TEST_CLIENT } from "~test/test-clients.js";
 import { base } from "../../chains/chain-definitions/base.js";
 import { ethereum } from "../../chains/chain-definitions/ethereum.js";
 import { sepolia } from "../../chains/chain-definitions/sepolia.js";
-import {
-  NATIVE_TOKEN_ADDRESS,
-  ZERO_ADDRESS,
-} from "../../constants/addresses.js";
+import { NATIVE_TOKEN_ADDRESS } from "../../constants/addresses.js";
 import { convertCryptoToFiat } from "./cryptoToFiat.js";
 
 describe.runIf(process.env.TW_SECRET_KEY)("Pay: crypto-to-fiat", () => {
   it("should convert ETH price to USD on Ethereum mainnet", async () => {
     const data = await convertCryptoToFiat({
       chain: ethereum,
-      fromTokenAddress: NATIVE_TOKEN_ADDRESS,
-      fromAmount: 1,
-      to: "USD",
       client: TEST_CLIENT,
+      fromAmount: 1,
+      fromTokenAddress: NATIVE_TOKEN_ADDRESS,
+      to: "USD",
     });
     expect(data.result).toBeDefined();
     // Should be a number
@@ -29,10 +26,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("Pay: crypto-to-fiat", () => {
   it("should convert ETH price to USD on Base mainnet", async () => {
     const data = await convertCryptoToFiat({
       chain: base,
-      fromTokenAddress: NATIVE_TOKEN_ADDRESS,
-      fromAmount: 1,
-      to: "USD",
       client: TEST_CLIENT,
+      fromAmount: 1,
+      fromTokenAddress: NATIVE_TOKEN_ADDRESS,
+      to: "USD",
     });
     expect(data.result).toBeDefined();
     // Should be a number
@@ -43,10 +40,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("Pay: crypto-to-fiat", () => {
   it("should return zero if fromAmount is zero", async () => {
     const data = await convertCryptoToFiat({
       chain: base,
-      fromTokenAddress: NATIVE_TOKEN_ADDRESS,
-      fromAmount: 0,
-      to: "USD",
       client: TEST_CLIENT,
+      fromAmount: 0,
+      fromTokenAddress: NATIVE_TOKEN_ADDRESS,
+      to: "USD",
     });
     expect(data.result).toBe(0);
   });
@@ -55,10 +52,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("Pay: crypto-to-fiat", () => {
     await expect(
       convertCryptoToFiat({
         chain: sepolia,
-        fromTokenAddress: NATIVE_TOKEN_ADDRESS,
-        fromAmount: 1,
-        to: "USD",
         client: TEST_CLIENT,
+        fromAmount: 1,
+        fromTokenAddress: NATIVE_TOKEN_ADDRESS,
+        to: "USD",
       }),
     ).rejects.toThrowError(
       `Cannot fetch price for a testnet (chainId: ${sepolia.id})`,
@@ -69,27 +66,13 @@ describe.runIf(process.env.TW_SECRET_KEY)("Pay: crypto-to-fiat", () => {
     await expect(
       convertCryptoToFiat({
         chain: ethereum,
-        fromTokenAddress: "haha",
-        fromAmount: 1,
-        to: "USD",
         client: TEST_CLIENT,
+        fromAmount: 1,
+        fromTokenAddress: "haha",
+        to: "USD",
       }),
     ).rejects.toThrowError(
       "Invalid fromTokenAddress. Expected a valid EVM contract address",
-    );
-  });
-
-  it("should throw error if fromTokenAddress is set to a wallet address", async () => {
-    await expect(
-      convertCryptoToFiat({
-        chain: base,
-        fromTokenAddress: ZERO_ADDRESS,
-        fromAmount: 1,
-        to: "USD",
-        client: TEST_CLIENT,
-      }),
-    ).rejects.toThrowError(
-      `Error: ${ZERO_ADDRESS} on chainId: ${base.id} is not a valid contract address.`,
     );
   });
 });

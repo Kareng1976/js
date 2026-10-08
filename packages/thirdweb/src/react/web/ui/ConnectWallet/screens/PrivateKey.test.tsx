@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import { render } from "~test/react-render.js";
 import { TEST_CLIENT } from "~test/test-clients.js";
@@ -11,9 +12,9 @@ describe("PrivateKey screen", () => {
   it("should render the iframe", () => {
     const { container } = render(
       <PrivateKey
-        onBack={() => {}}
         client={client}
         connectLocale={en}
+        onBack={() => {}}
         theme="dark"
         wallet={createWallet("io.metamask")}
       />,
@@ -27,9 +28,9 @@ describe("PrivateKey screen", () => {
     expect(() =>
       render(
         <PrivateKey
-          onBack={() => {}}
           client={client}
           connectLocale={en}
+          onBack={() => {}}
           theme="dark"
         />,
       ),
@@ -39,9 +40,9 @@ describe("PrivateKey screen", () => {
   it("should render the modal title", () => {
     const { container } = render(
       <PrivateKey
-        onBack={() => {}}
         client={client}
         connectLocale={en}
+        onBack={() => {}}
         theme="dark"
         wallet={createWallet("io.metamask")}
       />,

@@ -1,4 +1,15 @@
 "use client";
+import { formatDistanceToNow } from "date-fns";
+import {
+  ArrowLeftRightIcon,
+  ArrowRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExternalLinkIcon,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { type ThirdwebClient, type ThirdwebContract, toTokens } from "thirdweb";
+import type { ChainMetadata } from "thirdweb/chains";
 import { WalletAddress } from "@/components/blocks/wallet-address";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,25 +22,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ExternalLinkIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { type ThirdwebClient, type ThirdwebContract, toTokens } from "thirdweb";
-import type { ChainMetadata } from "thirdweb/chains";
 import {
   type TokenTransfersData,
   useTokenTransfers,
 } from "../_hooks/useTokenTransfers";
 
 const tokenAmountFormatter = new Intl.NumberFormat("en-US", {
-  notation: "compact",
   maximumFractionDigits: 3,
   minimumFractionDigits: 0,
+  notation: "compact",
 });
 
 function RecentTransfersUI(props: {
@@ -45,10 +46,41 @@ function RecentTransfersUI(props: {
   explorerUrl: string;
   client: ThirdwebClient;
 }) {
+  const groupedData = useMemo(() => {
+    const data: Array<{
+      group: TokenTransfersData[];
+      transactionHash: string;
+      blockTimestamp: string;
+    }> = [];
+
+    for (const transfer of props.data) {
+      const existingGroup = data.find(
+        (group) => group.transactionHash === transfer.transaction_hash,
+      );
+
+      if (existingGroup) {
+        existingGroup.group.push(transfer);
+      } else {
+        data.push({
+          group: [transfer],
+          transactionHash: transfer.transaction_hash,
+          blockTimestamp: transfer.block_timestamp,
+        });
+      }
+    }
+
+    return data;
+  }, [props.data]);
+
   return (
     <div>
-      <div className="mb-4">
-        <h2 className="font-semibold text-xl tracking-tight">
+      <div className="p-4 lg:p-6 bg-card border rounded-b-none border-b-0 rounded-xl">
+        <div className="flex mb-3">
+          <div className="rounded-full border p-2 bg-background">
+            <ArrowLeftRightIcon className="size-4 text-muted-foreground" />
+          </div>
+        </div>
+        <h2 className="font-semibold text-2xl tracking-tight mb-1">
           Recent Transfers
         </h2>
         <p className="text-muted-foreground text-sm">
@@ -57,7 +89,7 @@ function RecentTransfersUI(props: {
         </p>
       </div>
 
-      <TableContainer className="rounded-b-none">
+      <TableContainer className="rounded-b-none rounded-t-none">
         <Table>
           <TableHeader>
             <TableRow>
@@ -71,79 +103,90 @@ function RecentTransfersUI(props: {
           <TableBody>
             {props.isPending
               ? Array.from({ length: props.rowsPerPage }).map((_, index) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                  // biome-ignore lint/suspicious/noArrayIndexKey: EXPECTED
                   <SkeletonRow key={index} />
                 ))
-              : props.data.map((transfer) => (
+              : groupedData.map((group) => (
                   <TableRow
                     className="fade-in-0 animate-in duration-300"
-                    key={
-                      transfer.transaction_hash +
-                      transfer.amount +
-                      transfer.block_number +
-                      transfer.from_address
-                    }
+                    key={group.transactionHash}
                   >
-                    <TableCell className="text-sm">
-                      <WalletAddress
-                        address={transfer.from_address}
-                        client={props.client}
-                      />
+                    {/* From */}
+                    <TableCell className="relative space-y-1">
+                      {group.group.map((transfer) => (
+                        <div
+                          className="h-10 flex items-center gap-6 w-[150px]"
+                          key={transfer.log_index}
+                        >
+                          <WalletAddress
+                            address={transfer.from_address}
+                            client={props.client}
+                          />
+                          <ArrowRightIcon className="size-4 text-muted-foreground/50 absolute -right-1 lg:right-3" />
+                        </div>
+                      ))}
                     </TableCell>
-                    <TableCell className="text-sm">
-                      <WalletAddress
-                        address={transfer.to_address}
-                        client={props.client}
-                      />
+
+                    {/* To */}
+                    <TableCell className="relative space-y-1">
+                      {group.group.map((transfer) => (
+                        <div
+                          className="h-10 flex items-center gap-6 w-[150px]"
+                          key={transfer.log_index}
+                        >
+                          <WalletAddress
+                            address={transfer.to_address}
+                            client={props.client}
+                            key={transfer.log_index}
+                          />
+                        </div>
+                      ))}
                     </TableCell>
-                    <TableCell className="text-sm ">
-                      <div className="flex items-center gap-1.5">
-                        <span>
-                          {tokenAmountFormatter.format(
-                            Number(
-                              toTokens(
-                                BigInt(transfer.amount),
-                                props.tokenMetadata.decimals,
-                              ),
-                            ),
-                          )}
-                        </span>
-                        <span className="text-muted-foreground text-xs">
-                          {props.tokenMetadata.symbol}
-                        </span>
+
+                    {/* Amount */}
+                    <TableCell className="space-y-1">
+                      {group.group.map((transfer) => (
+                        <div
+                          className="h-10 flex items-center"
+                          key={transfer.log_index}
+                        >
+                          <TokenAmount
+                            amount={transfer.amount}
+                            decimals={props.tokenMetadata.decimals}
+                            symbol={props.tokenMetadata.symbol}
+                          />
+                        </div>
+                      ))}
+                    </TableCell>
+
+                    {/* timestamp */}
+                    <TableCell>
+                      <div
+                        key={group.blockTimestamp}
+                        className="capitalize text-muted-foreground text-sm"
+                      >
+                        {timestamp(group.blockTimestamp)}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm">
-                      {formatDistanceToNow(
-                        new Date(
-                          transfer.block_timestamp.endsWith("Z")
-                            ? transfer.block_timestamp
-                            : `${transfer.block_timestamp}Z`,
-                        ),
-                        {
-                          addSuffix: true,
-                        },
-                      )}
-                    </TableCell>
+
+                    {/* transaction */}
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        asChild
-                      >
-                        <a
-                          href={`${props.explorerUrl}/tx/${transfer.transaction_hash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(
-                            "flex items-center justify-center",
-                            "hover:bg-accent hover:text-accent-foreground",
-                          )}
+                      <div className="flex items-center justify-center">
+                        <Button
+                          asChild
+                          size="sm"
+                          variant="outline"
+                          className="text-muted-foreground hover:text-foreground rounded-full size-9 p-0 flex items-center justify-center"
                         >
-                          <ExternalLinkIcon className="h-4 w-4" />
-                        </a>
-                      </Button>
+                          <a
+                            href={`${props.explorerUrl}/tx/${group.transactionHash}`}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            <ExternalLinkIcon className="size-3.5" />
+                          </a>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -157,28 +200,56 @@ function RecentTransfersUI(props: {
         )}
       </TableContainer>
 
-      <div className="flex items-center justify-end gap-3 rounded-b-lg border-x border-b bg-card px-6 py-5">
+      <div className="flex items-center justify-end gap-3 rounded-b-xl border-x border-b bg-card px-6 py-5">
         <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 bg-background"
+          className="gap-1.5 bg-background rounded-full"
           disabled={props.page === 0 || props.isPending}
           onClick={() => props.setPage(props.page - 1)}
+          size="sm"
+          variant="outline"
         >
           <ChevronLeftIcon className="size-4 text-muted-foreground" />
           Previous
         </Button>
         <Button
-          variant="outline"
-          size="sm"
-          disabled={props.isPending || props.data.length === 0}
-          className="gap-1.5 bg-background"
+          className="gap-1.5 bg-background rounded-full"
+          disabled={props.isPending || props.data.length < props.rowsPerPage}
           onClick={() => props.setPage(props.page + 1)}
+          size="sm"
+          variant="outline"
         >
           Next
           <ChevronRightIcon className="size-4 text-muted-foreground" />
         </Button>
       </div>
+    </div>
+  );
+}
+
+function timestamp(block_timestamp: string) {
+  return formatDistanceToNow(
+    new Date(
+      block_timestamp.endsWith("Z") ? block_timestamp : `${block_timestamp}Z`,
+    ),
+    {
+      addSuffix: true,
+    },
+  );
+}
+
+function TokenAmount(props: {
+  amount: string;
+  decimals: number;
+  symbol: string;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span>
+        {tokenAmountFormatter.format(
+          Number(toTokens(BigInt(props.amount), props.decimals)),
+        )}
+      </span>
+      <span className="text-muted-foreground text-xs">{props.symbol}</span>
     </div>
   );
 }
@@ -199,7 +270,7 @@ function SkeletonRow() {
         <Skeleton className="h-6 w-32" />
       </TableCell>
       <TableCell>
-        <Skeleton className="h-6 w-6" />
+        <Skeleton className="size-9 rounded-full" />
       </TableCell>
     </TableRow>
   );
@@ -213,40 +284,30 @@ export function RecentTransfers(props: {
 }) {
   const rowsPerPage = 10;
   const [page, setPage] = useState(0);
-  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
 
   const tokenQuery = useTokenTransfers({
     chainId: props.clientContract.chain.id,
     contractAddress: props.clientContract.address,
-    page,
     limit: rowsPerPage,
+    page,
   });
 
-  // eslint-disable-next-line no-restricted-syntax
-  useEffect(() => {
-    if (!tokenQuery.isPending) {
-      setHasFetchedOnce(true);
-    }
-  }, [tokenQuery.isPending]);
-
   return (
-    <div>
-      <RecentTransfersUI
-        data={tokenQuery.data ?? []}
-        isPending={tokenQuery.isPending && !hasFetchedOnce}
-        rowsPerPage={rowsPerPage}
-        client={props.clientContract.client}
-        tokenMetadata={{
-          decimals: props.decimals,
-          symbol: props.tokenSymbol,
-        }}
-        page={page}
-        setPage={setPage}
-        explorerUrl={
-          props.chainMetadata.explorers?.[0]?.url ||
-          `https://thirdweb.com/${props.chainMetadata.slug}`
-        }
-      />
-    </div>
+    <RecentTransfersUI
+      client={props.clientContract.client}
+      data={tokenQuery.data ?? []}
+      explorerUrl={
+        props.chainMetadata.explorers?.[0]?.url ||
+        `https://thirdweb.com/${props.chainMetadata.slug}`
+      }
+      isPending={tokenQuery.isPending}
+      page={page}
+      rowsPerPage={rowsPerPage}
+      setPage={setPage}
+      tokenMetadata={{
+        decimals: props.decimals,
+        symbol: props.tokenSymbol,
+      }}
+    />
   );
 }

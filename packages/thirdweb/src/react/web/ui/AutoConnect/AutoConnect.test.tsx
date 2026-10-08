@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it } from "vitest";
 import { render } from "../../../../../test/src/react-render.js";
 import { TEST_CLIENT } from "../../../../../test/src/test-clients.js";
@@ -8,8 +9,8 @@ describe("AutoConnect", () => {
   it("does not break", () => {
     render(
       <AutoConnect
-        wallets={[createWallet("io.metamask")]}
         client={TEST_CLIENT}
+        wallets={[createWallet("io.metamask")]}
       />,
     );
   });

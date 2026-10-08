@@ -6,26 +6,32 @@ module.exports = [
   "/bounties",
   "/contact-us",
   // -- product landing pages --
-  // -- connect
-  "/connect",
-  "/connect/sign-in",
-  "/connect/account-abstraction",
-  "/connect/universal-bridge",
-  "/connect/auth",
-  "/connect/in-app-wallets",
-  // -- storage
-  "/storage",
-  // -- nebula
-  "/nebula",
-  // --insight
+  // -- build category
+  "/wallets",
+  "/account-abstraction",
+  "/payments",
+  "/x402",
+  "/nexus",
+  "/auth",
+  "/in-app-wallets",
+  "/transactions",
+  // -- end build category
+
+  // -- scale category
+  "/rpc",
   "/insight",
+  "/storage",
+  "/gateway",
+  // -- end scale category
+
+  // -- ai
+  "/ai",
   // -- contracts
   "/contracts",
   "/contracts/modular-contracts",
   "/contracts/explore",
   "/contracts/deployment-tool",
-  // -- engine
-  "/engine",
+
   // -- solutions pages --
   "/solutions/:solution_slug",
   // -- campaigns --
@@ -40,7 +46,8 @@ module.exports = [
   "/community/ambassadors",
   "/community/startup-program",
   // -- grants --
-  "/grant/superchain",
+  "/grants",
+  "/superchain",
   // -- templates --
   "/templates",
   "/templates/:template_slug",
@@ -58,4 +65,10 @@ module.exports = [
   // -- universal bridge landing pages --
   "/universal-bridge-regions/:region_slug",
   "/enterprise",
+  "/token",
+  "/vault",
+  "/monetize/bridge",
+  // ai
+  "/ai-privacy-policy",
+  "/ai-terms",
 ];

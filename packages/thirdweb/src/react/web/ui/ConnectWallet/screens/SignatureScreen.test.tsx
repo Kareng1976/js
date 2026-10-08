@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TEST_ACCOUNT_A } from "~test/test-wallets.js";
@@ -38,27 +39,27 @@ vi.mock("../../../../core/hooks/wallets/useAdminWallet", () => ({
 }));
 
 const mockConnectLocale = {
+  agreement: {
+    and: "and",
+    prefix: "By connecting, you agree to our",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+  },
   signatureScreen: {
-    title: "Sign In",
     instructionScreen: {
-      title: "Sign Message",
+      disconnectWallet: "Disconnect",
       instruction: "Please sign the message",
       signInButton: "Sign In",
-      disconnectWallet: "Disconnect",
+      title: "Sign Message",
     },
     signingScreen: {
-      title: "Signing",
-      inProgress: "Signing in progress...",
       failedToSignIn: "Failed to sign in",
+      inProgress: "Signing in progress...",
       prompt: "Please check your wallet",
+      title: "Signing",
       tryAgain: "Try Again",
     },
-  },
-  agreement: {
-    prefix: "By connecting, you agree to our",
-    termsOfService: "Terms of Service",
-    and: "and",
-    privacyPolicy: "Privacy Policy",
+    title: "Sign In",
   },
 } as unknown as ConnectLocale;
 
@@ -74,11 +75,11 @@ describe("Signature screen", () => {
     it("renders initial state correctly", () => {
       const { getByTestId } = render(
         <SignatureScreen
-          onDone={() => {}}
-          modalSize="wide"
-          connectLocale={mockConnectLocale}
-          client={TEST_CLIENT}
           auth={mockAuth}
+          client={TEST_CLIENT}
+          connectLocale={mockConnectLocale}
+          modalSize="wide"
+          onDone={() => {}}
         />,
         { setConnectedWallet: true },
       );
@@ -91,11 +92,11 @@ describe("Signature screen", () => {
       const onDoneMock = vi.fn();
       const { getByRole, getByText } = render(
         <SignatureScreen
-          onDone={onDoneMock}
-          modalSize="wide"
-          connectLocale={mockConnectLocale}
-          client={TEST_CLIENT}
           auth={mockAuth}
+          client={TEST_CLIENT}
+          connectLocale={mockConnectLocale}
+          modalSize="wide"
+          onDone={onDoneMock}
         />,
         { setConnectedWallet: true },
       );
@@ -113,11 +114,11 @@ describe("Signature screen", () => {
       mockAuth.doLogin.mockRejectedValueOnce(new Error("Signing failed"));
       const { getByTestId, getByRole, getByText } = render(
         <SignatureScreen
-          onDone={() => {}}
-          modalSize="wide"
-          connectLocale={mockConnectLocale}
-          client={TEST_CLIENT}
           auth={mockAuth}
+          client={TEST_CLIENT}
+          connectLocale={mockConnectLocale}
+          modalSize="wide"
+          onDone={() => {}}
         />,
         { setConnectedWallet: true },
       );
@@ -147,11 +148,11 @@ describe("Signature screen", () => {
 
     const { queryByTestId } = render(
       <SignatureScreen
-        onDone={() => {}}
-        modalSize="wide"
-        connectLocale={mockConnectLocale}
-        client={TEST_CLIENT}
         auth={mockAuth}
+        client={TEST_CLIENT}
+        connectLocale={mockConnectLocale}
+        modalSize="wide"
+        onDone={() => {}}
       />,
       { setConnectedWallet: true },
     );
@@ -164,11 +165,11 @@ describe("Signature screen", () => {
       it("automatically triggers sign in on mount", async () => {
         render(
           <SignatureScreen
-            onDone={() => {}}
-            modalSize="wide"
-            connectLocale={mockConnectLocale}
-            client={TEST_CLIENT}
             auth={mockAuth}
+            client={TEST_CLIENT}
+            connectLocale={mockConnectLocale}
+            modalSize="wide"
+            onDone={() => {}}
           />,
           { setConnectedWallet: true },
         );
@@ -181,11 +182,11 @@ describe("Signature screen", () => {
       it("shows signing message during signing state", async () => {
         const { getByText } = render(
           <SignatureScreen
-            onDone={() => {}}
-            modalSize="wide"
-            connectLocale={mockConnectLocale}
-            client={TEST_CLIENT}
             auth={mockAuth}
+            client={TEST_CLIENT}
+            connectLocale={mockConnectLocale}
+            modalSize="wide"
+            onDone={() => {}}
           />,
           { setConnectedWallet: true },
         );
@@ -202,11 +203,11 @@ describe("Signature screen", () => {
 
         const { getByText, getByRole } = render(
           <SignatureScreen
-            onDone={() => {}}
-            modalSize="wide"
-            connectLocale={mockConnectLocale}
-            client={TEST_CLIENT}
             auth={mockAuth}
+            client={TEST_CLIENT}
+            connectLocale={mockConnectLocale}
+            modalSize="wide"
+            onDone={() => {}}
           />,
           { setConnectedWallet: true },
         );
@@ -229,11 +230,11 @@ describe("Signature screen", () => {
 
         const { getByRole, getByText } = render(
           <SignatureScreen
-            onDone={() => {}}
-            modalSize="wide"
-            connectLocale={mockConnectLocale}
-            client={TEST_CLIENT}
             auth={mockAuth}
+            client={TEST_CLIENT}
+            connectLocale={mockConnectLocale}
+            modalSize="wide"
+            onDone={() => {}}
           />,
           { setConnectedWallet: true },
         );
@@ -269,11 +270,11 @@ describe("Signature screen", () => {
 
         const { getByTestId } = render(
           <SignatureScreen
-            onDone={() => {}}
-            modalSize="wide"
-            connectLocale={mockConnectLocale}
-            client={TEST_CLIENT}
             auth={mockAuth}
+            client={TEST_CLIENT}
+            connectLocale={mockConnectLocale}
+            modalSize="wide"
+            onDone={() => {}}
           />,
           { setConnectedWallet: true },
         );

@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import { TEST_CONTRACT_URI } from "~test/ipfs-uris.js";
 import { render } from "~test/react-render.js";
@@ -14,14 +15,14 @@ describe.runIf(process.env.TW_SECRET_KEY)("ChainIcon-legacy", () => {
 
   it("getSrcChainIcon should return the resolved url", () => {
     const resolvedUrl = getSrcChainIcon({
-      client,
       chainIconUrl: TEST_CONTRACT_URI,
+      client,
     });
     expect(resolvedUrl.startsWith("https://")).toBe(true);
   });
 
   it("getSrcChainIcon should return the fallbackChainIcon if fails to resolve", () => {
-    expect(getSrcChainIcon({ client, chainIconUrl: "test" })).toBe(
+    expect(getSrcChainIcon({ chainIconUrl: "test", client })).toBe(
       fallbackChainIcon,
     );
   });
@@ -46,10 +47,10 @@ describe.runIf(process.env.TW_SECRET_KEY)("ChainIcon-legacy", () => {
   it("should render ChainActiveDot if the `active` prop is set to true", () => {
     const { container } = render(
       <ChainIcon
+        active
         chainIconUrl="ipfs://QmcxZHpyJa8T4i63xqjPYrZ6tKrt55tZJpbXcjSDKuKaf9/ethereum/512.png"
         client={client}
         size="lg"
-        active
       />,
     );
     const activeDot = container.querySelector(

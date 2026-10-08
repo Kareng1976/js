@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import {
   DOODLES_CONTRACT,
@@ -28,8 +29,8 @@ describe.runIf(process.env.TW_SECRET_KEY)("NFTDescription", () => {
   it("fetchNftDescription should respect descriptionResolver as a string", async () => {
     const desc = await fetchNftDescription({
       contract: DOODLES_CONTRACT,
-      tokenId: 0n,
       descriptionResolver: "string",
+      tokenId: 0n,
     });
     expect(desc).toBe("string");
   });
@@ -37,8 +38,8 @@ describe.runIf(process.env.TW_SECRET_KEY)("NFTDescription", () => {
   it("fetchNftDescription should respect descriptionResolver as a non-async function", async () => {
     const desc = await fetchNftDescription({
       contract: DOODLES_CONTRACT,
-      tokenId: 0n,
       descriptionResolver: () => "non-async",
+      tokenId: 0n,
     });
     expect(desc).toBe("non-async");
   });
@@ -46,8 +47,8 @@ describe.runIf(process.env.TW_SECRET_KEY)("NFTDescription", () => {
   it("fetchNftDescription should respect descriptionResolver as a async function", async () => {
     const desc = await fetchNftDescription({
       contract: DOODLES_CONTRACT,
-      tokenId: 0n,
       descriptionResolver: async () => "async",
+      tokenId: 0n,
     });
     expect(desc).toBe("async");
   });

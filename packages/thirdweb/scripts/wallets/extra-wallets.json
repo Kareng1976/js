@@ -119,5 +119,117 @@
       "native": null,
       "universal": null
     }
+  },
+  {
+    "id": "frame",
+    "name": "Frame Wallet",
+    "homepage": "https://frame.sh/",
+    "image_id": "frame.png",
+    "app": {
+      "browser": null,
+      "ios": null,
+      "android": null,
+      "mac": null,
+      "windows": null,
+      "linux": null,
+      "chrome": null,
+      "firefox": null,
+      "safari": null,
+      "edge": null,
+      "opera": null
+    },
+    "rdns": "sh.frame",
+    "mobile": {
+      "native": null,
+      "universal": null
+    },
+    "desktop": {
+      "native": null,
+      "universal": null
+    }
+  },
+  {
+    "id": "use-glyph",
+    "name": "Glyph Wallet",
+    "homepage": "https://useglyph.io/",
+    "image_id": "glyph.png",
+    "app": {
+      "browser": null,
+      "ios": null,
+      "android": null,
+      "mac": null,
+      "windows": null,
+      "linux": null,
+      "chrome": null,
+      "firefox": null,
+      "safari": null,
+      "edge": null,
+      "opera": null
+    },
+    "rdns": "io.useglyph",
+    "mobile": {
+      "native": null,
+      "universal": null
+    },
+    "desktop": {
+      "native": null,
+      "universal": null
+    }
+  },
+  {
+    "id": "org.base.account",
+    "name": "Base Account",
+    "homepage": "https://base.org/",
+    "image_id": "base.svg",
+    "app": {
+      "browser": null,
+      "ios": null,
+      "android": null,
+      "mac": null,
+      "windows": null,
+      "linux": null,
+      "chrome": null,
+      "firefox": null,
+      "safari": null,
+      "edge": null,
+      "opera": null
+    },
+    "rdns": "org.base.account",
+    "mobile": {
+      "native": null,
+      "universal": null
+    },
+    "desktop": {
+      "native": null,
+      "universal": null
+    }
+  },
+  {
+    "id": "me.vultisig",
+    "name": "Vultisig",
+    "homepage": "https://vultisig.com",
+    "image_id": "vultisig.svg",
+    "app": {
+      "browser": null,
+      "ios": "https://apps.apple.com/app/apple-store/id6503023896",
+      "android": "https://play.google.com/store/apps/details?id=com.vultisig.wallet",
+      "mac": null,
+      "windows": null,
+      "linux": null,
+      "chrome": "https://chromewebstore.google.com/detail/vultisig-extension/ggafhcdaplkhmmnlbfjpnnkepdfjaelb",
+      "firefox": null,
+      "safari": null,
+      "edge": null,
+      "opera": null
+    },
+    "rdns": "me.vultisig",
+    "mobile": {
+      "native": null,
+      "universal": null
+    },
+    "desktop": {
+      "native": null,
+      "universal": null
+    }
   }
 ]

@@ -1,4 +1,4 @@
-import { getRawAccount } from "../../../../../../account/settings/getAccount";
+import { getRawAccount } from "@/api/account/get-account";
 import type { PublicContractPageParams } from "../../types";
 import { SharedEnglishAuctionsPage } from "./shared-english-auctions-page";
 
@@ -9,10 +9,10 @@ export default async function Page(props: {
 
   return (
     <SharedEnglishAuctionsPage
-      contractAddress={params.contractAddress}
       chainIdOrSlug={params.chain_id}
-      projectMeta={undefined}
+      contractAddress={params.contractAddress}
       isLoggedIn={!!account}
+      projectMeta={undefined}
     />
   );
 }

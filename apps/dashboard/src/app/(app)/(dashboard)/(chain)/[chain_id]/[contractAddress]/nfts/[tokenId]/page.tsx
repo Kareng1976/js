@@ -1,4 +1,4 @@
-import { getRawAccount } from "../../../../../../account/settings/getAccount";
+import { getRawAccount } from "@/api/account/get-account";
 import type { PublicContractPageParams } from "../../types";
 import { SharedNFTTokenPage } from "./shared-nfts-token-page";
 
@@ -13,11 +13,11 @@ export default async function Page(props: {
 
   return (
     <SharedNFTTokenPage
-      contractAddress={params.contractAddress}
       chainIdOrSlug={params.chain_id}
-      tokenId={params.tokenId}
-      projectMeta={undefined}
+      contractAddress={params.contractAddress}
       isLoggedIn={!!account}
+      projectMeta={undefined}
+      tokenId={params.tokenId}
     />
   );
 }

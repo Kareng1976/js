@@ -1,4 +1,20 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { CircleAlertIcon } from "lucide-react";
+import { useCallback } from "react";
+import { useForm } from "react-hook-form";
+import type { PreparedTransaction, ThirdwebClient } from "thirdweb";
+import {
+  grantRoles,
+  hasAllRoles,
+  MintableERC20,
+  MintableERC721,
+  MintableERC1155,
+} from "thirdweb/modules";
+import { useReadContract } from "thirdweb/react";
+import { z } from "zod";
+import { TransactionButton } from "@/components/tx-button";
 import {
   Accordion,
   AccordionContent,
@@ -20,28 +36,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { TransactionButton } from "components/buttons/TransactionButton";
-import { useTxNotifications } from "hooks/useTxNotifications";
-import { CircleAlertIcon } from "lucide-react";
-import { useCallback } from "react";
-import { useForm } from "react-hook-form";
-import {
-  type PreparedTransaction,
-  type ThirdwebClient,
-  sendAndConfirmTransaction,
-} from "thirdweb";
-import {
-  MintableERC20,
-  MintableERC721,
-  MintableERC1155,
-} from "thirdweb/modules";
-import { grantRoles, hasAllRoles } from "thirdweb/modules";
-import { useReadContract } from "thirdweb/react";
-import type { NFTMetadataInputLimited } from "types/modified-types";
-import { parseAttributes } from "utils/parseAttributes";
-import { z } from "zod";
+import { useSendAndConfirmTx } from "@/hooks/useSendTx";
+import { useTxNotifications } from "@/hooks/useTxNotifications";
+import type { NFTMetadataInputLimited } from "@/types/modified-types";
+import { parseAttributes } from "@/utils/parseAttributes";
 import { addressSchema } from "../zod-schemas";
 import { ModuleCardUI, type ModuleCardUIProps } from "./module-card";
 import type { ModuleInstanceProps } from "./module-instance";
@@ -72,7 +70,7 @@ const MINTER_ROLE = 1n;
 
 function MintableModule(props: ModuleInstanceProps) {
   const { contract, ownerAccount } = props;
-
+  const sendAndConfirmTx = useSendAndConfirmTx();
   const isErc721 = props.contractInfo.name === "MintableERC721";
 
   const primarySaleRecipientQuery = useReadContract(
@@ -83,8 +81,8 @@ function MintableModule(props: ModuleInstanceProps) {
   );
   const hasMinterRole = useReadContract(hasAllRoles, {
     contract: contract,
-    user: ownerAccount?.address || "",
     roles: MINTER_ROLE,
+    user: ownerAccount?.address || "",
   });
 
   const isBatchMetadataInstalled = !!props.allModuleContractInfo.find(
@@ -101,47 +99,47 @@ function MintableModule(props: ModuleInstanceProps) {
       if (!hasMinterRole.data) {
         const grantRoleTx = grantRoles({
           contract,
-          user: ownerAccount.address,
           roles: MINTER_ROLE,
+          user: ownerAccount.address,
         });
 
-        await sendAndConfirmTransaction({
-          account: ownerAccount,
-          transaction: grantRoleTx,
-        });
+        await sendAndConfirmTx.mutateAsync(grantRoleTx);
       }
 
       let mintTx: PreparedTransaction;
       if (props.contractInfo.name === "MintableERC721") {
         mintTx = MintableERC721.mintWithRole({
           contract,
-          to: values.recipient,
           nfts: [nft],
+          to: values.recipient,
         });
       } else if (props.contractInfo.name === "MintableERC20") {
         mintTx = MintableERC20.mintWithRole({
           contract,
-          to: values.recipient,
           quantity: String(values.amount),
+          to: values.recipient,
         });
       } else if (values.useNextTokenId || values.tokenId) {
         mintTx = MintableERC1155.mintWithRole({
-          contract,
-          to: values.recipient,
           amount: BigInt(values.amount),
-          tokenId: values.tokenId ? BigInt(values.tokenId) : undefined,
+          contract,
           nft,
+          to: values.recipient,
+          tokenId: values.tokenId ? BigInt(values.tokenId) : undefined,
         });
       } else {
         throw new Error("Invalid token ID");
       }
 
-      await sendAndConfirmTransaction({
-        account: ownerAccount,
-        transaction: mintTx,
-      });
+      await sendAndConfirmTx.mutateAsync(mintTx);
     },
-    [contract, ownerAccount, hasMinterRole.data, props.contractInfo.name],
+    [
+      contract,
+      ownerAccount,
+      hasMinterRole.data,
+      props.contractInfo.name,
+      sendAndConfirmTx.mutateAsync,
+    ],
   );
 
   const update = useCallback(
@@ -162,26 +160,28 @@ function MintableModule(props: ModuleInstanceProps) {
         primarySaleRecipient: values.primarySaleRecipient,
       });
 
-      await sendAndConfirmTransaction({
-        account: ownerAccount,
-        transaction: setSaleConfigTx,
-      });
+      await sendAndConfirmTx.mutateAsync(setSaleConfigTx);
     },
-    [contract, ownerAccount, props.contractInfo.name],
+    [
+      contract,
+      ownerAccount,
+      props.contractInfo.name,
+      sendAndConfirmTx.mutateAsync,
+    ],
   );
 
   return (
     <MintableModuleUI
       {...props}
+      client={contract.client}
+      contractChainId={contract.chain.id}
+      isBatchMetadataInstalled={isBatchMetadataInstalled}
+      isOwnerAccount={!!ownerAccount}
       isPending={primarySaleRecipientQuery.isPending}
+      mint={mint}
+      name={props.contractInfo.name}
       primarySaleRecipient={primarySaleRecipientQuery.data}
       updatePrimaryRecipient={update}
-      mint={mint}
-      isOwnerAccount={!!ownerAccount}
-      name={props.contractInfo.name}
-      isBatchMetadataInstalled={isBatchMetadataInstalled}
-      contractChainId={contract.chain.id}
-      client={contract.client}
     />
   );
 }
@@ -208,20 +208,20 @@ export function MintableModuleUI(
       {!props.isPending && (
         <div className="flex flex-col gap-4">
           {/* Mint NFT */}
-          <Accordion type="single" collapsible className="-mx-1">
-            <AccordionItem value="metadata" className="border-none">
+          <Accordion className="-mx-1" collapsible type="single">
+            <AccordionItem className="border-none" value="metadata">
               <AccordionTrigger className="border-border border-t px-1">
                 Mint NFT
               </AccordionTrigger>
               <AccordionContent className="px-1">
                 {props.isOwnerAccount && (
                   <MintNFTSection
+                    client={props.client}
+                    contractChainId={props.contractChainId}
+                    isBatchMetadataInstalled={props.isBatchMetadataInstalled}
                     isLoggedIn={props.isLoggedIn}
                     mint={props.mint}
                     name={props.name}
-                    isBatchMetadataInstalled={props.isBatchMetadataInstalled}
-                    contractChainId={props.contractChainId}
-                    client={props.client}
                   />
                 )}
                 {!props.isOwnerAccount && (
@@ -236,20 +236,20 @@ export function MintableModuleUI(
             </AccordionItem>
 
             <AccordionItem
-              value="primary-sale-recipient"
               className="border-none "
+              value="primary-sale-recipient"
             >
               <AccordionTrigger className="border-border border-t px-1">
                 Primary Sale Recipient
               </AccordionTrigger>
               <AccordionContent className="px-1">
                 <PrimarySalesSection
+                  client={props.client}
+                  contractChainId={props.contractChainId}
+                  isLoggedIn={props.isLoggedIn}
                   isOwnerAccount={props.isOwnerAccount}
                   primarySaleRecipient={props.primarySaleRecipient}
                   update={props.updatePrimaryRecipient}
-                  contractChainId={props.contractChainId}
-                  isLoggedIn={props.isLoggedIn}
-                  client={props.client}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -286,8 +286,8 @@ function PrimarySalesSection(props: {
 
   const updateMutation = useMutation({
     mutationFn: props.update,
-    onSuccess: updateNotifications.onSuccess,
     onError: updateNotifications.onError,
+    onSuccess: updateNotifications.onSuccess,
   });
 
   const onSubmit = async () => {
@@ -320,15 +320,15 @@ function PrimarySalesSection(props: {
 
         <div className="mt-4 flex justify-end">
           <TransactionButton
-            client={props.client}
-            isLoggedIn={props.isLoggedIn}
-            size="sm"
             className="min-w-24"
+            client={props.client}
             disabled={updateMutation.isPending || !props.isOwnerAccount}
-            type="submit"
+            isLoggedIn={props.isLoggedIn}
             isPending={updateMutation.isPending}
+            size="sm"
             transactionCount={1}
             txChainID={props.contractChainId}
+            type="submit"
           >
             Update
           </TransactionButton>
@@ -339,9 +339,9 @@ function PrimarySalesSection(props: {
 }
 
 const mintFormSchema = z.object({
-  useNextTokenId: z.boolean(),
   recipient: addressSchema,
   tokenId: z.coerce.number().min(0, { message: "Invalid tokenId" }).optional(),
+  useNextTokenId: z.boolean(),
 });
 
 function MintNFTSection(props: {
@@ -354,13 +354,13 @@ function MintNFTSection(props: {
 }) {
   const form = useForm<MintFormValues>({
     resolver: zodResolver(mintFormSchema),
-    values: {
-      useNextTokenId: false,
-      recipient: "",
-      attributes: [{ trait_type: "", value: "" }],
-      amount: 1,
-    },
     reValidateMode: "onChange",
+    values: {
+      amount: 1,
+      attributes: [{ trait_type: "", value: "" }],
+      recipient: "",
+      useNextTokenId: false,
+    },
   });
 
   const mintNotifications = useTxNotifications(
@@ -370,8 +370,8 @@ function MintNFTSection(props: {
 
   const mintMutation = useMutation({
     mutationFn: props.mint,
-    onSuccess: mintNotifications.onSuccess,
     onError: mintNotifications.onError,
+    onSuccess: mintNotifications.onSuccess,
   });
 
   const onSubmit = async () => {
@@ -397,7 +397,11 @@ function MintNFTSection(props: {
             <div className="flex flex-col gap-6 lg:flex-row">
               {/* Left */}
               <div className="shrink-0 lg:w-[300px]">
-                <NFTMediaFormGroup form={form} previewMaxWidth="300px" />
+                <NFTMediaFormGroup
+                  client={props.client}
+                  form={form}
+                  previewMaxWidth="300px"
+                />
               </div>
 
               {/* Right */}
@@ -438,17 +442,17 @@ function MintNFTSection(props: {
 
                 {/* Advanced options */}
                 <Accordion
-                  type="single"
                   collapsible={
                     !(
                       form.formState.errors.background_color ||
                       form.formState.errors.external_url
                     )
                   }
+                  type="single"
                 >
                   <AccordionItem
-                    value="advanced-options"
                     className="-mx-1 border-t border-b-0"
+                    value="advanced-options"
                   >
                     <AccordionTrigger className="px-1">
                       Advanced Options
@@ -518,8 +522,8 @@ function MintNFTSection(props: {
                     <FormItem className="absolute top-0 right-0 flex items-center gap-2">
                       <CheckboxWithLabel>
                         <Checkbox
-                          className="mt-0"
                           checked={field.value}
+                          className="mt-0"
                           onCheckedChange={field.onChange}
                         />
                         Use next token ID
@@ -534,15 +538,15 @@ function MintNFTSection(props: {
 
           <div className="flex justify-end">
             <TransactionButton
-              client={props.client}
-              isLoggedIn={props.isLoggedIn}
-              size="sm"
               className="min-w-24"
+              client={props.client}
               disabled={mintMutation.isPending}
-              type="submit"
+              isLoggedIn={props.isLoggedIn}
               isPending={mintMutation.isPending}
-              txChainID={props.contractChainId}
+              size="sm"
               transactionCount={1}
+              txChainID={props.contractChainId}
+              type="submit"
             >
               Mint
             </TransactionButton>

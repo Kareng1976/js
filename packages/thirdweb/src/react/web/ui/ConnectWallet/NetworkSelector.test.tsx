@@ -1,9 +1,11 @@
+// @vitest-environment happy-dom
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "~test/react-render.js";
 import { TEST_CLIENT } from "~test/test-clients.js";
 import { base } from "../../../../chains/chain-definitions/base.js";
 import { ethereum } from "../../../../chains/chain-definitions/ethereum.js";
 import { useActiveWalletChain } from "../../../../react/core/hooks/wallets/useActiveWalletChain.js";
+import en from "./locale/en.js";
 import {
   ChainButton,
   NetworkButton,
@@ -13,7 +15,6 @@ import {
   StyledMagnifyingGlassIcon,
   TabButton,
 } from "./NetworkSelector.js";
-import en from "./locale/en.js";
 
 const client = TEST_CLIENT;
 
@@ -46,11 +47,11 @@ describe("NetworkSelector", () => {
     const { container } = render(
       <ChainButton
         chain={ethereum}
-        onClick={() => {}}
-        confirming={true}
-        switchingFailed={false}
         client={client}
+        confirming={true}
         connectLocale={en}
+        onClick={() => {}}
+        switchingFailed={false}
       />,
     );
     await waitFor(
@@ -71,11 +72,11 @@ describe("NetworkSelector", () => {
     render(
       <ChainButton
         chain={ethereum}
-        onClick={() => {}}
-        confirming={true}
-        switchingFailed={true}
         client={client}
+        confirming={true}
         connectLocale={en}
+        onClick={() => {}}
+        switchingFailed={true}
       />,
     );
     await waitFor(
@@ -101,11 +102,11 @@ describe("NetworkSelector", () => {
     const { container } = render(
       <ChainButton
         chain={ethereum}
-        onClick={() => {}}
-        confirming={true}
-        switchingFailed={true}
         client={client}
+        confirming={true}
         connectLocale={en}
+        onClick={() => {}}
+        switchingFailed={true}
       />,
     );
     await waitFor(() => {
@@ -120,11 +121,11 @@ describe("NetworkSelector", () => {
     const { container } = render(
       <ChainButton
         chain={ethereum}
-        onClick={() => {}}
-        confirming={false}
-        switchingFailed={false}
         client={client}
+        confirming={false}
         connectLocale={en}
+        onClick={() => {}}
+        switchingFailed={false}
       />,
     );
 
@@ -142,8 +143,8 @@ describe("NetworkSelector", () => {
   it("NetworkList should render ChainIcon by default", async () => {
     render(
       <NetworkList
-        client={client}
         chains={[ethereum, base]}
+        client={client}
         connectLocale={en}
         onSwitch={() => {}}
       />,
@@ -175,11 +176,11 @@ describe("NetworkSelector", () => {
 
     const { container } = render(
       <NetworkList
-        renderChain={CustomRender}
-        client={client}
         chains={[ethereum, base]}
+        client={client}
         connectLocale={en}
         onSwitch={() => {}}
+        renderChain={CustomRender}
       />,
     );
 

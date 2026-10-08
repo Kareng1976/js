@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -30,8 +31,8 @@ describe("useAddConnectedWallet", () => {
 
   const wallet = createWalletAdapter({
     adaptedAccount: TEST_ACCOUNT_A,
-    client: TEST_CLIENT,
     chain: ethereum,
+    client: TEST_CLIENT,
     onDisconnect: () => {},
     switchChain: () => {},
   });

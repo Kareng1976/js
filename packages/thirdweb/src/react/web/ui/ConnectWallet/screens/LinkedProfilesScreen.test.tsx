@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "../../../../../../test/src/react-render.js";
 import { useSocialProfiles } from "../../../../core/social/useSocialProfiles.js";
@@ -18,8 +19,7 @@ describe("LinkedProfilesScreen", () => {
   };
 
   const mockProps = {
-    onBack: vi.fn(),
-    setScreen: vi.fn(),
+    client: mockClient,
     locale: {
       manageWallet: {
         linkedProfiles: "Linked Profiles",
@@ -27,7 +27,8 @@ describe("LinkedProfilesScreen", () => {
       },
       // biome-ignore lint/suspicious/noExplicitAny: Mocking data
     } as any,
-    client: mockClient,
+    onBack: vi.fn(),
+    setScreen: vi.fn(),
   };
 
   beforeEach(() => {
@@ -41,7 +42,7 @@ describe("LinkedProfilesScreen", () => {
   describe("getProfileDisplayName", () => {
     it("should display email for email profile type", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "email", details: { email: "test@example.com" } }],
+        data: [{ details: { email: "test@example.com" }, type: "email" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -52,7 +53,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should display email for google profile type", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "google", details: { email: "google@example.com" } }],
+        data: [{ details: { email: "google@example.com" }, type: "google" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -63,7 +64,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should display phone number for phone profile type", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "phone", details: { phone: "+1234567890" } }],
+        data: [{ details: { phone: "+1234567890" }, type: "phone" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -76,8 +77,8 @@ describe("LinkedProfilesScreen", () => {
       vi.mocked(useProfiles).mockReturnValue({
         data: [
           {
-            type: "wallet",
             details: { address: "0x1234567890abcdef1234567890abcdef12345678" },
+            type: "wallet",
           },
         ],
         isLoading: false,
@@ -90,7 +91,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should display email for cognito profile type", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "cognito", details: { email: "cognito@example.com" } }],
+        data: [{ details: { email: "cognito@example.com" }, type: "cognito" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -101,7 +102,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should capitalize unknown profile types", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "unknown", details: {} }],
+        data: [{ details: {}, type: "unknown" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -112,7 +113,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should not display guest profiles", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "guest", details: {} }],
+        data: [{ details: {}, type: "guest" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -124,8 +125,8 @@ describe("LinkedProfilesScreen", () => {
     it("should render unlink button when there are multiple profiles", () => {
       vi.mocked(useProfiles).mockReturnValue({
         data: [
-          { type: "email", details: { email: "test@example.com" } },
-          { type: "google", details: { email: "google@example.com" } },
+          { details: { email: "test@example.com" }, type: "email" },
+          { details: { email: "google@example.com" }, type: "google" },
         ],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
@@ -137,7 +138,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should not render unlink button when there is only one profile", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "email", details: { email: "test@example.com" } }],
+        data: [{ details: { email: "test@example.com" }, type: "email" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -148,7 +149,7 @@ describe("LinkedProfilesScreen", () => {
 
     it("should not display custom_jwt profiles", () => {
       vi.mocked(useProfiles).mockReturnValue({
-        data: [{ type: "custom_jwt", details: {} }],
+        data: [{ details: {}, type: "custom_jwt" }],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data
       } as any);
@@ -160,9 +161,9 @@ describe("LinkedProfilesScreen", () => {
     it("should display profiles that are not guest or custom_jwt", () => {
       vi.mocked(useProfiles).mockReturnValue({
         data: [
-          { type: "email", details: { email: "test@example.com" } },
-          { type: "custom_jwt", details: {} },
-          { type: "guest", details: {} },
+          { details: { email: "test@example.com" }, type: "email" },
+          { details: {}, type: "custom_jwt" },
+          { details: {}, type: "guest" },
         ],
         isLoading: false,
         // biome-ignore lint/suspicious/noExplicitAny: Mocking data

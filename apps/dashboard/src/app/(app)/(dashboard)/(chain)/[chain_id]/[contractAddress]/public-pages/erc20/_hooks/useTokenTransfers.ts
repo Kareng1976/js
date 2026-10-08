@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { getUnixTime, subDays } from "date-fns";
 import { isProd } from "@/constants/env-utils";
 import { NEXT_PUBLIC_DASHBOARD_CLIENT_ID } from "@/constants/public-envs";
-import { useQuery } from "@tanstack/react-query";
 
 export type TokenTransfersData = {
   from_address: string;
@@ -23,10 +24,6 @@ export function useTokenTransfers(params: {
   limit: number;
 }) {
   return useQuery({
-    queryKey: ["token-transfers", params],
-    retry: false,
-    retryOnMount: false,
-    refetchOnWindowFocus: false,
     queryFn: async () => {
       const domain = isProd ? "thirdweb" : "thirdweb-dev";
       const url = new URL(
@@ -39,6 +36,11 @@ export function useTokenTransfers(params: {
       url.searchParams.set("page", params.page.toString());
       url.searchParams.set("limit", params.limit.toString());
       url.searchParams.set("clientId", NEXT_PUBLIC_DASHBOARD_CLIENT_ID);
+      const THIRTY_DAYS_AGO = subDays(new Date(), 30);
+      url.searchParams.set(
+        "block_timestamp_from",
+        getUnixTime(THIRTY_DAYS_AGO).toString(),
+      );
 
       const res = await fetch(url);
       if (!res.ok) {
@@ -49,6 +51,15 @@ export function useTokenTransfers(params: {
       const data = json.data as TokenTransfersData[];
       return data;
     },
-    refetchInterval: 5000,
+    queryKey: ["token-transfers", params],
+    refetchInterval: (data) => {
+      if (data?.state.error) {
+        return false;
+      }
+      return 5000;
+    },
+    refetchOnWindowFocus: false,
+    retry: false,
+    retryOnMount: false,
   });
 }

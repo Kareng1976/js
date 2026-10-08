@@ -7,18 +7,18 @@ export const wallet = {
   homepage: "https://wigwam.app",
   image_id: "6200b005-f202-41d5-7bd9-966c970f6700",
   app: {
-    browser: null,
+    browser: "https://wallet.wigwam.app",
     ios: "https://apps.apple.com/app/id6630381643",
     android: "https://play.google.com/store/apps/details?id=com.wigwamapp",
-    mac: null,
-    windows: null,
-    linux: null,
+    mac: "",
+    windows: "",
+    linux: "",
     chrome:
       "https://chromewebstore.google.com/detail/wigwam-%E2%80%94-web3-wallet/lccbohhgfkdikahanoclbdmaolidjdfl",
-    firefox: null,
-    safari: null,
-    edge: null,
-    opera: null,
+    firefox: "",
+    safari: "",
+    edge: "",
+    opera: "",
   },
   rdns: "com.wigwam.wallet",
   mobile: {
@@ -26,7 +26,7 @@ export const wallet = {
     universal: "https://wigwam.app/",
   },
   desktop: {
-    native: null,
-    universal: null,
+    native: "",
+    universal: "https://wallet.wigwam.app",
   },
 } as const;

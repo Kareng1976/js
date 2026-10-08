@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 import { render } from "~test/react-render.js";
 import { TEST_CLIENT } from "~test/test-clients.js";
@@ -9,7 +10,7 @@ const client = TEST_CLIENT;
 describe("ReceiveFunds screen", () => {
   it("should render a title with locale.title", () => {
     const { container } = render(
-      <ReceiveFunds onBack={() => {}} client={client} connectLocale={en} />,
+      <ReceiveFunds client={client} connectLocale={en} onBack={() => {}} />,
     );
     const element = container.querySelector("h2");
     expect(element).not.toBe(null);
@@ -18,7 +19,7 @@ describe("ReceiveFunds screen", () => {
 
   it("should render a span with locale.instruction", () => {
     const { container } = render(
-      <ReceiveFunds onBack={() => {}} client={client} connectLocale={en} />,
+      <ReceiveFunds client={client} connectLocale={en} onBack={() => {}} />,
     );
     const element = container.querySelector(
       "span.receive_fund_screen_instruction",
@@ -29,7 +30,7 @@ describe("ReceiveFunds screen", () => {
 
   it("should render the CopyIcon", () => {
     const { container } = render(
-      <ReceiveFunds onBack={() => {}} client={client} connectLocale={en} />,
+      <ReceiveFunds client={client} connectLocale={en} onBack={() => {}} />,
     );
     const element = container.querySelector("svg.tw-copy-icon");
     expect(element).not.toBe(null);

@@ -1,4 +1,4 @@
-import { getRawAccount } from "../../../../../account/settings/getAccount";
+import { getRawAccount } from "@/api/account/get-account";
 import type { PublicContractPageParams } from "../types";
 import { SharedPermissionsPage } from "./shared-permissions-page";
 
@@ -8,10 +8,10 @@ export default async function Page(props: {
   const [params, account] = await Promise.all([props.params, getRawAccount()]);
   return (
     <SharedPermissionsPage
-      contractAddress={params.contractAddress}
       chainIdOrSlug={params.chain_id}
-      projectMeta={undefined}
+      contractAddress={params.contractAddress}
       isLoggedIn={!!account}
+      projectMeta={undefined}
     />
   );
 }
